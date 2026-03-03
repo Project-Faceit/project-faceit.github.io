@@ -98,6 +98,11 @@
             text-overflow: ellipsis;
             display: block;
         }
+         <button id="copy-profile-link">Скопировать ссылку на профиль</button>
+
+         <span id="copy-status" style="display:none; color: green; margin-left: 10px;">Скопировано!</span>
+
+
         .clan-tag { color: var(--text-muted); font-weight: 500; font-family: 'Inter', sans-serif; font-size: 1rem; margin-right: 5px; }
         
         .sidebar-actions { display: flex; gap: 10px; }
@@ -214,6 +219,7 @@
             <option value="Снайпер">Роль: Снайпер</option>
             <option value="Энтри-фрагер">Роль: Энтри-фрагер</option>
             <option value="Саппорт">Роль: Саппорт</option>
+            <option value="Опен Фрагер">Роль: Люркер</option>
             <option value="Опен Фрагер">Роль: Опен Фрагер</option>
         </select>
         
@@ -274,9 +280,9 @@
         <main class="main-content">
             
             <nav class="nav-tabs">
-                <span class="active" data-tab="tab-summary">Summary</span>
-                <span data-tab="tab-history">Match history</span>
-                <span data-tab="tab-stats">Stats</span>
+                <span class="active" data-tab="tab-summary">Общая Информация</span>
+                <span data-tab="tab-history">История матчей</span>
+                <span data-tab="tab-stats">Статистика</span>
             </nav>
 
             <div class="hero-banner" id="userBanner">
@@ -290,7 +296,7 @@
                 <div class="stats-grid">
                     <div class="stat-box">
                         <span class="stat-val" id="wins">0</span>
-                        <span class="stat-label">Matches Won</span>
+                        <span class="stat-label">Matches Win</span>
                     </div>
                     <div class="stat-box">
                         <span class="stat-val" id="losses">0</span>
@@ -419,6 +425,34 @@
         messagingSenderId: "681525286192",
         appId: "1:681525286192:web:42dee0506a6c2cf32b64f5"
     };
+    const copyBtn = document.getElementById('copy-profile-link');
+const statusText = document.getElementById('copy-status');
+
+copyBtn.addEventListener('click', () => {
+    // Получаем текущую ссылку страницы
+    const profileUrl = window.location.href;
+
+    // Используем современный Clipboard API
+    navigator.clipboard.writeText(profileUrl)
+        .then(() => {
+            // Что происходит при успешном копировании:
+            showSuccess();
+        })
+        .catch(err => {
+            console.error('Не удалось скопировать: ', err);
+        });
+});
+
+function showSuccess() {
+    statusText.style.display = 'inline';
+    copyBtn.innerText = 'Ссылка скопирована!';
+    
+    // Возвращаем текст кнопки назад через 2 секунды
+    setTimeout(() => {
+        statusText.style.display = 'none';
+        copyBtn.innerText = 'Скопировать ссылку на профиль';
+    }, 2000);
+}
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
