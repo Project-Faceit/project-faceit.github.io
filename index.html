@@ -4,68 +4,94 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Project Faceit 2.0 | Profile & Auth</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --orange: #ff6a00;
             --dark-orange: #e65c00;
             --glass: rgba(255, 255, 255, 0.05);
             --border: rgba(255, 255, 255, 0.1);
+            --bg-dark: #0b0b0f;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Montserrat', sans-serif;
-            background: radial-gradient(circle at top right, #2a1610, #0b0b0f);
+            background: radial-gradient(circle at top right, #2a1610, var(--bg-dark));
+            background-attachment: fixed;
             color: white;
             padding: 15px;
             min-height: 100vh;
         }
 
-        .container { max-width: 450px; margin: auto; }
-        h1 { font-family: 'Orbitron', sans-serif; text-align: center; margin: 20px 0; color: var(--orange); }
+        .container { max-width: 450px; margin: auto; padding-top: 20px; }
+        h1 { font-family: 'Orbitron', sans-serif; text-align: center; margin-bottom: 30px; color: var(--orange); text-shadow: 0 0 15px rgba(255, 106, 0, 0.4); }
+        h2 { font-family: 'Orbitron', sans-serif; font-size: 1.2rem; margin-bottom: 15px; }
 
         /* Glass Cards */
         .card {
             background: var(--glass);
-            backdrop-filter: blur(15px);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 20px;
+            border-radius: 20px;
+            padding: 25px;
             margin-bottom: 20px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
         }
 
         /* Inputs & Buttons */
         input {
-            width: 100%; padding: 12px; margin: 8px 0; border-radius: 12px;
-            border: 1px solid var(--border); background: rgba(0,0,0,0.3); color: white; outline: none;
+            width: 100%; padding: 14px; margin: 8px 0 15px; border-radius: 12px;
+            border: 1px solid var(--border); background: rgba(0,0,0,0.4); color: white; outline: none;
+            font-family: 'Montserrat', sans-serif; font-weight: 600; transition: 0.3s;
         }
+        input:focus { border-color: var(--orange); box-shadow: 0 0 10px rgba(255, 106, 0, 0.3); }
+        
         button {
             width: 100%; padding: 14px; border-radius: 30px; border: none;
-            font-weight: 700; cursor: pointer; transition: 0.3s; margin-top: 10px;
+            font-weight: 800; font-family: 'Montserrat', sans-serif; cursor: pointer; transition: 0.3s; margin-top: 5px;
         }
         .btn-primary { background: linear-gradient(45deg, var(--orange), #ff9500); color: white; }
-        .btn-google { background: white; color: #444; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .btn-tg { background: #0088cc; color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255, 106, 0, 0.4); }
+        .btn-google { background: white; color: #111; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px; }
+        .btn-secondary { background: rgba(255,255,255,0.1); color: white; }
 
         /* Profile Styles */
-        .profile-header { text-align: center; position: relative; }
+        .profile-header { text-align: center; position: relative; padding-top: 30px; }
         .avatar-container {
-            width: 100px; height: 100px; margin: 0 auto 15px; position: relative;
+            width: 110px; height: 110px; margin: 0 auto 15px; position: relative;
         }
         .avatar-img {
             width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
-            border: 3px solid var(--orange); box-shadow: 0 0 15px rgba(255, 106, 0, 0.4);
+            border: 3px solid var(--border); transition: 0.3s;
         }
         .avatar-edit-label {
             position: absolute; bottom: 0; right: 0; background: var(--orange);
-            width: 30px; height: 30px; border-radius: 50%; display: flex;
-            align-items: center; justify-content: center; cursor: pointer; font-size: 12px;
+            width: 34px; height: 34px; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; cursor: pointer; font-size: 16px;
+            border: 3px solid var(--bg-dark); transition: 0.3s;
         }
-        .nickname-display { font-family: 'Orbitron', sans-serif; font-size: 1.4rem; margin-bottom: 5px; }
+        .avatar-edit-label:hover { transform: scale(1.1); }
         
+        .nickname-display { font-family: 'Orbitron', sans-serif; font-size: 1.6rem; font-weight: 800; letter-spacing: 1px; }
+        .game-id-display { color: #aaa; font-size: 0.9rem; margin-top: 5px; font-weight: 600; }
+        
+        /* Rank Banner */
+        .rank-badge {
+            display: inline-block; padding: 4px 15px; border-radius: 20px; font-size: 0.8rem;
+            font-weight: 800; margin-top: 10px; text-transform: uppercase; letter-spacing: 1px;
+            border: 1px solid;
+        }
+
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; text-align: center; margin-top: 20px;}
+        .stat-box { background: rgba(0,0,0,0.3); padding: 15px 10px; border-radius: 15px; border: 1px solid var(--border); }
+        .stat-val { display: block; font-size: 1.4rem; font-weight: 800; font-family: 'Orbitron', sans-serif; }
+        .stat-label { font-size: 0.7rem; color: #aaa; text-transform: uppercase; margin-top: 5px; font-weight: 600; }
+
         .hidden { display: none !important; }
-        .social-divider { text-align: center; margin: 15px 0; font-size: 0.8rem; color: #888; }
+        .divider { text-align: center; margin: 20px 0; font-size: 0.8rem; color: #666; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -73,57 +99,75 @@
 <div class="container">
     <h1>PROJECT FACEIT</h1>
 
-    <div id="authSection" class="card">
-        <h2 style="margin-bottom: 15px; font-size: 1.2rem;">Присоединяйся</h2>
+    <div id="authSection" class="card hidden">
+        <h2>Вход в систему</h2>
         
         <div id="emailForm">
-            <input type="text" id="regNickname" placeholder="Твой Никнейм (для новых)">
             <input type="email" id="email" placeholder="Email">
             <input type="password" id="password" placeholder="Пароль">
-            <button class="btn-primary" id="btnRegister">Создать аккаунт</button>
-            <button style="background:none; color: var(--orange); font-size: 0.9rem;" id="toggleLogin">Уже есть аккаунт? Войти</button>
+            <button class="btn-primary" id="btnLogin">Войти</button>
+            <button class="btn-secondary" id="btnRegister" style="margin-top: 10px;">Создать аккаунт</button>
         </div>
 
-        <div class="social-divider">ИЛИ ВОЙТИ ЧЕРЕЗ</div>
+        <div class="divider">ИЛИ ЧЕРЕЗ СЕЦИАЛЬНЫЕ СЕТИ</div>
 
         <button class="btn-google" id="btnGoogle">
-            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg" width="18"> Google
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg" width="18"> Войти через Google
         </button>
-        <button class="btn-tg" id="btnTelegram">Telegram</button>
+    </div>
+
+    <div id="setupSection" class="card hidden">
+        <h2>Настройка профиля</h2>
+        <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 15px;">Заполни данные из игры Standoff 2, чтобы продолжить. Они должны быть уникальными.</p>
+        
+        <input type="text" id="setupNickname" placeholder="Твой Никнейм в игре">
+        <input type="number" id="setupGameId" placeholder="Твой ID в игре (только цифры)">
+        
+        <button class="btn-primary" id="btnSaveSetup">Сохранить профиль</button>
     </div>
 
     <div id="profileSection" class="hidden">
         <div class="card profile-header">
             <div class="avatar-container">
-                <img src="https://via.placeholder.com/100" id="userAvatar" class="avatar-img">
-                <label for="avatarUpload" class="avatar-edit-label">✎</label>
+                <img src="https://ui-avatars.com/api/?name=Player&background=random" id="userAvatar" class="avatar-img">
+                <label for="avatarUpload" class="avatar-edit-label">📸</label>
                 <input type="file" id="avatarUpload" class="hidden" accept="image/*">
             </div>
-            <div class="nickname-display" id="displayNickname">Player</div>
-            <div style="color: #aaa; font-size: 0.9rem;" id="displayEmail">email@example.com</div>
+            <div class="nickname-display" id="displayNickname">Loading...</div>
+            <div class="game-id-display">ID: <span id="displayGameId">00000000</span></div>
+            
+            <div id="rankBadge" class="rank-badge">Загрузка...</div>
         </div>
 
         <div class="card">
-            <h3 style="margin-bottom: 10px;">Статистика</h3>
-            <div style="display: flex; justify-content: space-around; text-align: center;">
-                <div><div style="color: var(--orange); font-weight: 800;" id="elo">1000</div>ELO</div>
-                <div><div style="font-weight: 800;" id="wins">0</div>Wins</div>
-                <div><div style="font-weight: 800;" id="losses">0</div>Losses</div>
+            <h2>Статистика</h2>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <span class="stat-val" id="elo" style="color: var(--orange);">1000</span>
+                    <span class="stat-label">ELO</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-val" id="wins">0</span>
+                    <span class="stat-label">Победы</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-val" id="losses">0</span>
+                    <span class="stat-label">Поражения</span>
+                </div>
             </div>
         </div>
 
         <button class="btn-primary" id="btnMatchForm">Отправить результат матча</button>
-        <button style="background: #333; color: white;" id="btnLogout">Выйти</button>
+        <button class="btn-secondary" id="btnEditProfile" style="margin-top: 10px;">Изменить Ник/ID</button>
+        <button style="background: #222; color: #ff4444; width: 100%; padding: 14px; border-radius: 30px; border: none; font-weight: 700; margin-top: 10px; cursor: pointer;" id="btnLogout">Выйти из аккаунта</button>
     </div>
 </div>
 
 <script type="module">
+    // Добавлены методы query, where, getDocs для проверки уникальности
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { 
-        getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, 
-        signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup 
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, query, where, getDocs, collection } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
     import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
     const firebaseConfig = {
@@ -141,95 +185,173 @@
     const storage = getStorage(app);
     const googleProvider = new GoogleAuthProvider();
 
-    // --- ЛОГИКА АВТОРИЗАЦИИ ---
+    // UI элементы
+    const authSec = document.getElementById('authSection');
+    const profileSec = document.getElementById('profileSection');
+    const setupSec = document.getElementById('setupSection');
 
-    // Регистрация с никнеймом
+    // Логика рангов (Баннеры)
+    function getRankDetails(elo) {
+        if (elo < 1050) return { name: "Новичок", color: "#888888", bg: "rgba(136, 136, 136, 0.1)" };
+        if (elo < 1150) return { name: "Бронза", color: "#cd7f32", bg: "rgba(205, 127, 50, 0.1)" };
+        if (elo < 1300) return { name: "Серебро", color: "#c0c0c0", bg: "rgba(192, 192, 192, 0.1)" };
+        if (elo < 1500) return { name: "Золото", color: "#ffd700", bg: "rgba(255, 215, 0, 0.1)" };
+        if (elo < 1800) return { name: "Мастер", color: "#ff6a00", bg: "rgba(255, 106, 0, 0.1)" };
+        return { name: "Легенда", color: "#ff0000", bg: "rgba(255, 0, 0, 0.1)" };
+    }
+
+    // Проверка уникальности Ника или ID
+    async function checkUnique(field, value, currentUid) {
+        const q = query(collection(db, "players"), where(field, "==", value));
+        const snap = await getDocs(q);
+        let isUnique = true;
+        snap.forEach(doc => {
+            if (doc.id !== currentUid) isUnique = false;
+        });
+        return isUnique;
+    }
+
+    // РЕГИСТРАЦИЯ (теперь без ника, ник спросим потом)
     document.getElementById('btnRegister').addEventListener('click', async () => {
         const email = document.getElementById('email').value;
         const pass = document.getElementById('password').value;
-        const nick = document.getElementById('regNickname').value;
-
-        if(!nick) return alert("Введите никнейм!");
-
+        if(pass.length < 6) return alert("Пароль минимум 6 символов!");
         try {
             const res = await createUserWithEmailAndPassword(auth, email, pass);
-            await setDoc(doc(db, "players", res.user.uid), {
-                nickname: nick,
-                email: email,
-                avatar: "https://via.placeholder.com/100",
-                elo: 1000, wins: 0, losses: 0
-            });
-        } catch (e) { alert(e.message); }
+            await setDoc(doc(db, "players", res.user.uid), { email: email, elo: 1000, wins: 0, losses: 0 });
+        } catch (e) { alert("Ошибка: " + e.message); }
     });
 
-    // Вход через Google
+    // ВХОД ЕМАЙЛ
+    document.getElementById('btnLogin').addEventListener('click', async () => {
+        const email = document.getElementById('email').value;
+        const pass = document.getElementById('password').value;
+        try { await signInWithEmailAndPassword(auth, email, pass); } 
+        catch (e) { alert("Ошибка входа!"); }
+    });
+
+    // GOOGLE ВХОД
     document.getElementById('btnGoogle').addEventListener('click', async () => {
         try {
             const res = await signInWithPopup(auth, googleProvider);
-            const user = res.user;
-            
-            // Проверяем, есть ли такой игрок в базе
-            const userDoc = await getDoc(doc(db, "players", user.uid));
+            const userDoc = await getDoc(doc(db, "players", res.user.uid));
             if (!userDoc.exists()) {
-                // Если новый — создаем запись
-                await setDoc(doc(db, "players", user.uid), {
-                    nickname: user.displayName || "New Player",
-                    email: user.email,
-                    avatar: user.photoURL || "https://via.placeholder.com/100",
-                    elo: 1000, wins: 0, losses: 0
+                await setDoc(doc(db, "players", res.user.uid), {
+                    email: res.user.email, avatar: res.user.photoURL, elo: 1000, wins: 0, losses: 0
                 });
             }
         } catch (e) { alert("Ошибка Google: " + e.message); }
     });
 
-    // Telegram (Заглушка)
-    document.getElementById('btnTelegram').addEventListener('click', () => {
-        alert("Вход через Telegram в разработке. Требуется настройка BotFather.");
+    // СОХРАНЕНИЕ ПРОФИЛЯ (Ник и ID)
+    document.getElementById('btnSaveSetup').addEventListener('click', async () => {
+        const user = auth.currentUser;
+        if (!user) return;
+        
+        const nick = document.getElementById('setupNickname').value.trim();
+        const gameId = document.getElementById('setupGameId').value.trim();
+
+        if (nick.length < 3) return alert("Никнейм должен быть больше 3 символов.");
+        if (gameId.length < 5) return alert("Введите корректный ID из игры.");
+
+        document.getElementById('btnSaveSetup').innerText = "Проверка...";
+        
+        // Проверяем уникальность
+        const isNickUnique = await checkUnique("nickname", nick, user.uid);
+        const isIdUnique = await checkUnique("gameId", gameId, user.uid);
+
+        if (!isNickUnique) {
+            document.getElementById('btnSaveSetup').innerText = "Сохранить профиль";
+            return alert("Этот Никнейм уже занят другим игроком!");
+        }
+        if (!isIdUnique) {
+            document.getElementById('btnSaveSetup').innerText = "Сохранить профиль";
+            return alert("Этот ID уже привязан к другому аккаунту!");
+        }
+
+        // Сохраняем
+        await updateDoc(doc(db, "players", user.uid), { nickname: nick, gameId: gameId });
+        
+        document.getElementById('btnSaveSetup').innerText = "Сохранить профиль";
+        checkUserState(user); // Перезагружаем интерфейс
     });
 
-    // --- ЛОГИКА ПРОФИЛЯ ---
-
-    // Загрузка аватара
+    // ЗАГРУЗКА АВАТАРКИ
     document.getElementById('avatarUpload').addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-
         const user = auth.currentUser;
         const storageRef = ref(storage, `avatars/${user.uid}`);
         
         try {
-            alert("Загрузка аватара...");
+            alert("Загружаем аватар... Подождите.");
             await uploadBytes(storageRef, file);
             const url = await getDownloadURL(storageRef);
-            
-            // Обновляем в базе и на странице
             await updateDoc(doc(db, "players", user.uid), { avatar: url });
             document.getElementById('userAvatar').src = url;
-            alert("Аватар обновлен!");
-        } catch (e) { alert("Ошибка загрузки: " + e.message); }
-    });
-
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            document.getElementById('authSection').classList.add('hidden');
-            document.getElementById('profileSection').classList.remove('hidden');
-            
-            const snap = await getDoc(doc(db, "players", user.uid));
-            if (snap.exists()) {
-                const data = snap.data();
-                document.getElementById('displayNickname').innerText = data.nickname;
-                document.getElementById('displayEmail').innerText = data.email;
-                document.getElementById('userAvatar').src = data.avatar;
-                document.getElementById('elo').innerText = data.elo;
-                document.getElementById('wins').innerText = data.wins;
-                document.getElementById('losses').innerText = data.losses;
-            }
-        } else {
-            document.getElementById('authSection').classList.remove('hidden');
-            document.getElementById('profileSection').classList.add('hidden');
+        } catch (e) { 
+            alert("Ошибка! Возможно, закрыты правила Storage. Читайте инструкцию."); 
+            console.error(e);
         }
     });
 
+    // КНОПКА РЕДАКТИРОВАНИЯ
+    document.getElementById('btnEditProfile').addEventListener('click', () => {
+        profileSec.classList.add('hidden');
+        setupSec.classList.remove('hidden');
+        // Подставляем текущие значения
+        document.getElementById('setupNickname').value = document.getElementById('displayNickname').innerText;
+        document.getElementById('setupGameId').value = document.getElementById('displayGameId').innerText;
+    });
+
+    // ГЛАВНЫЙ СЛУШАТЕЛЬ АВТОРИЗАЦИИ
+    async function checkUserState(user) {
+        if (user) {
+            authSec.classList.add('hidden');
+            const snap = await getDoc(doc(db, "players", user.uid));
+            
+            if (snap.exists()) {
+                const data = snap.data();
+                
+                // Если нет Ника или ID — кидаем на страницу настройки
+                if (!data.nickname || !data.gameId) {
+                    profileSec.classList.add('hidden');
+                    setupSec.classList.remove('hidden');
+                } else {
+                    // Все данные есть — показываем профиль
+                    setupSec.classList.add('hidden');
+                    profileSec.classList.remove('hidden');
+                    
+                    document.getElementById('displayNickname').innerText = data.nickname;
+                    document.getElementById('displayGameId').innerText = data.gameId;
+                    document.getElementById('elo').innerText = data.elo;
+                    document.getElementById('wins').innerText = data.wins;
+                    document.getElementById('losses').innerText = data.losses;
+                    
+                    // Установка аватарки (если её нет - ставим красивую заглушку с первой буквой ника)
+                    const defaultAvatar = `https://ui-avatars.com/api/?name=${data.nickname}&background=ff6a00&color=fff`;
+                    document.getElementById('userAvatar').src = data.avatar || defaultAvatar;
+                    
+                    // Отрисовка Баннера Ранга
+                    const rank = getRankDetails(data.elo);
+                    const badge = document.getElementById('rankBadge');
+                    badge.innerText = rank.name;
+                    badge.style.color = rank.color;
+                    badge.style.borderColor = rank.color;
+                    badge.style.backgroundColor = rank.bg;
+                    
+                    // Подсветка рамки аватарки цветом ранга
+                    document.getElementById('userAvatar').style.borderColor = rank.color;
+                }
+            }
+        } else {
+            authSec.classList.remove('hidden');
+            profileSec.classList.add('hidden');
+            setupSec.classList.add('hidden');
+        }
+    }
+
+    onAuthStateChanged(auth, checkUserState);
     document.getElementById('btnLogout').addEventListener('click', () => signOut(auth));
 </script>
 </body>
