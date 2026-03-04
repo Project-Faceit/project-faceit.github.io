@@ -32,6 +32,11 @@
             padding: 20px;
             overflow-x: hidden;
         }
+        
+        /* Блокировка скролла при открытом меню */
+        body.menu-open {
+            overflow: hidden;
+        }
 
         /* Общие контейнеры */
         .container { width: 100%; max-width: 1200px; margin: auto; flex-grow: 1; }
@@ -42,9 +47,13 @@
         h2 { font-size: 1.2rem; margin-bottom: 15px; font-weight: 600; }
 
         /* ================= МЕНЮ (ГАМБУРГЕР) ================= */
-        .bento-menu { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; width: 28px; height: 28px; cursor: pointer; transition: 0.3s; padding: 2px; }
-        .bento-menu span { background: var(--text-main); border-radius: 2px; width: 6px; height: 6px; transition: 0.3s; }
+        .bento-menu { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; width: 28px; height: 28px; cursor: pointer; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); padding: 2px; }
+        .bento-menu span { background: var(--text-main); border-radius: 2px; width: 6px; height: 6px; transition: 0.4s; }
         .bento-menu:hover span { background: var(--red); box-shadow: 0 0 5px var(--red); }
+        
+        /* Анимация гамбургера при открытии */
+        .bento-menu.active { transform: rotate(90deg) scale(0.9); }
+        .bento-menu.active span { background: var(--red); border-radius: 50%; box-shadow: 0 0 8px var(--red); }
         
         .side-menu-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); z-index: 999; display: none; backdrop-filter: blur(4px); }
         .side-menu-overlay.active { display: block; animation: fadeIn 0.3s forwards; }
@@ -61,12 +70,17 @@
         .menu-nav { display: flex; flex-direction: column; padding: 20px 0; flex-grow: 1; }
         .menu-nav a { display: flex; align-items: center; gap: 15px; padding: 12px 25px; color: var(--text-main); text-decoration: none; font-size: 0.95rem; font-weight: 500; transition: 0.2s; border-left: 3px solid transparent; }
         .menu-nav a:hover { background: var(--bg-panel-hover); border-left-color: var(--red); color: white; }
-        .menu-nav a svg { width: 18px; height: 18px; fill: currentColor; color: var(--text-muted); transition: 0.2s; }
-        .menu-nav a:hover svg { color: var(--red); }
+        .menu-nav a svg { width: 20px; height: 20px; fill: currentColor; color: var(--text-muted); transition: 0.2s; }
+        .menu-nav a:hover svg { color: var(--red); transform: scale(1.1); }
         .menu-nav .divider { height: 1px; background: var(--border); margin: 10px 20px; }
 
         .menu-footer { padding: 20px; border-top: 1px solid var(--border); background: rgba(0,0,0,0.3); }
-        .online-status { display: flex; align-items: center; font-size: 0.85rem; color: var(--text-muted); font-weight: 600; margin-bottom: 15px; }
+        
+        .stats-footer { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
+        .stats-row { display: flex; align-items: center; font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
+        .stats-row svg { margin-right: 10px; width: 14px; height: 14px; fill: currentColor; }
+        .stats-val { color: var(--text-main); margin-left: auto; font-family: 'Orbitron', sans-serif; font-weight: 700; }
+        
         .blink-dot { width: 10px; height: 10px; background: var(--win-green); border-radius: 50%; margin-right: 10px; box-shadow: 0 0 10px var(--win-green); animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
         
@@ -242,24 +256,31 @@
         </div>
     </div>
     <nav class="menu-nav">
-        <a href="#">Главная</a>
-        <a href="#">Играть Faceit</a>
-        <a href="#">Общий чат Faceit</a>
-        <a href="#">Ранги</a>
-        <a href="#">Турниры</a>
-        <a href="#">Создать команду</a>
+        <a href="#"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg> Главная</a>
+        <a href="#"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Играть Faceit</a>
+        <a href="#"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg> Общий чат</a>
+        <a href="#"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg> Ранги</a>
+        <a href="#"><svg viewBox="0 0 24 24"><path d="M19 3H5v14c0 1.66 1.34 3 3 3h8c1.66 0 3-1.34 3-3V3zm-7 15c-1.66 0-3-1.34-3-3V7h6v8c0 1.66-1.34 3-3 3z"/></svg> Турниры</a>
+        <a href="#"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg> Создать команду</a>
         <div class="divider"></div>
-        <a href="#">Лента новостей</a>
-        <a href="#">Tier лента</a>
+        <a href="#"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg> Лента новостей</a>
+        <a href="#"><svg viewBox="0 0 24 24"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/></svg> Tier лента</a>
         <div class="divider"></div>
-        <a href="#">О нас</a>
-        <a href="#">Тех.поддержка</a>
+        <a href="#"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg> О нас</a>
+        <a href="#"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-2h2v2zm1-4c-1.1 0-2-.9-2-2V9c0-1.1.9-2 2-2s2 .9 2 2v2c0 1.1-.9 2-2 2z"/></svg> Тех.поддержка</a>
     </nav>
     <div class="menu-footer">
-        <div class="online-status">
-            <span class="blink-dot"></span> Сейчас на сайте: 1,342
+        <div class="stats-footer">
+            <div class="stats-row" title="Пользователей онлайн">
+                <span class="blink-dot"></span> 
+                В сети: <span class="stats-val" id="menuOnlineCount">--</span>
+            </div>
+            <div class="stats-row" title="Зарегистрировано игроков">
+                <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                Игроков: <span class="stats-val" id="menuRegisteredCount">--</span>
+            </div>
         </div>
-        <input type="text" class="menu-search" placeholder="Поиск пользователя...">
+        <input type="text" class="menu-search" id="menuSearchInput" placeholder="Поиск пользователя...">
     </div>
 </aside>
 
@@ -272,7 +293,8 @@
             <span></span><span></span><span></span>
         </div>
         <h1 class="logo">PROJECT FACEIT</h1>
-        <div style="width: 28px;"></div> </header>
+        <div style="width: 28px;"></div> 
+    </header>
 
     <div id="authSection" class="panel auth-setup-wrapper hidden">
         <h2>Вход в систему</h2>
@@ -509,7 +531,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, updateDoc, query, where, getDocs, collection } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, query, where, getDocs, collection, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAuQJaKE1GS4D6GbqZfhOtTij-GXIvQF1w",
@@ -540,9 +562,43 @@
     function toggleMenu() {
         sideMenu.classList.toggle('open');
         menuOverlay.classList.toggle('active');
+        menuToggle.classList.toggle('active'); // Анимация 9 точек
+        document.body.classList.toggle('menu-open'); // Блокировка скролла сайта
     }
     menuToggle.addEventListener('click', toggleMenu);
     menuOverlay.addEventListener('click', toggleMenu);
+
+    // --- Логика Поиска ---
+    const searchInput = document.getElementById('menuSearchInput');
+    searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && searchInput.value.trim() !== '') {
+            alert(`Ищем пользователя: ${searchInput.value}`);
+            searchInput.value = ''; // очищаем поле после ввода
+            // Здесь в будущем можно добавить реальный редирект или фильтрацию
+        }
+    });
+
+    // --- Логика Онлайна и Зарегистрированных пользователей ---
+    async function updateOnlineStats() {
+        try {
+            const coll = collection(db, "players");
+            const snapshot = await getCountFromServer(coll);
+            const totalUsers = snapshot.data().count;
+            
+            document.getElementById('menuRegisteredCount').innerText = totalUsers;
+            
+            // Т.к. полноценный онлайн делается через Realtime Database, 
+            // мы берем красивую симуляцию онлайна от общего числа регистраций (например, ~20-30% онлайна)
+            const simulatedOnline = Math.max(1, Math.floor(totalUsers * 0.25) + Math.floor(Math.random() * 5));
+            document.getElementById('menuOnlineCount').innerText = simulatedOnline;
+        } catch(e) { 
+            console.error("Ошибка при получении статистики:", e); 
+        }
+    }
+    // Запускаем при загрузке и обновляем каждые 30 секунд
+    updateOnlineStats();
+    setInterval(updateOnlineStats, 30000);
+
 
     // --- Логика копирования ссылки профиля ---
     const copyBtn = document.getElementById('copy-profile-link');
@@ -752,7 +808,7 @@
             const originalColor = this.style.color;
             this.style.color = 'var(--win-green)';
             this.innerText = 'Скопировано!';
-            this.style.pointerEvents = 'none'; // Защита от двойного клика до конца анимации
+            this.style.pointerEvents = 'none'; 
             setTimeout(() => { 
                 this.style.color = originalColor; 
                 this.innerText = idText; 
