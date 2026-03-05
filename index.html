@@ -26,7 +26,7 @@
             box-sizing: border-box; 
         }
 
-        /* Кастомный скроллбар для темной темы */
+        /* Кастомный скроллбар */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: var(--bg-base); }
         ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
@@ -129,7 +129,6 @@
             animation: fadeIn 0.3s forwards; 
         }
         
-        /* Стеклянное меню */
         .side-menu { 
             position: fixed; 
             top: 0; left: -320px; 
@@ -266,7 +265,6 @@
             box-shadow: 0 0 10px rgba(255, 42, 42, 0.2); 
         }
 
-        /* Контейнер результатов поиска */
         .search-results-box {
             position: absolute; 
             bottom: 80px; left: 15px; right: 15px;
@@ -294,7 +292,6 @@
         .search-item-nick { font-weight: 700; font-size: 0.9rem; font-family: 'Orbitron', sans-serif; }
         .search-item-id { font-size: 0.7rem; color: var(--text-muted); }
 
-        /* Панели (Карточки) */
         .panel { 
             background: var(--bg-panel); 
             border: 1px solid var(--border); 
@@ -409,7 +406,6 @@
         .social-link:hover { color: white; border-color: var(--red); background: rgba(255, 42, 42, 0.1); }
         .social-link svg { width: 18px; height: 18px; fill: currentColor; }
 
-        /* Вкладки */
         .main-content { display: flex; flex-direction: column; gap: 15px; }
         .nav-tabs { 
             display: flex; gap: 20px; font-size: 0.9rem; font-weight: 600; 
@@ -527,7 +523,7 @@
 <div class="side-menu-overlay" id="menuOverlay"></div>
 <aside class="side-menu" id="sideMenu">
     <div class="menu-profile-header" id="menuProfileBtn" title="Перейти в профиль">
-        <img src="https://ui-avatars.com/api/?name=P&background=ff2a2a&color=fff" id="menuAvatar" alt="Аватар">
+        <img src="https://ui-avatars.com/api/?name=U&background=ff2a2a&color=fff" id="menuAvatar" alt="Аватар">
         <div>
             <span class="name" id="menuDisplayName">Авторизуйтесь</span>
             <span class="sub" id="menuSubName">Перейти в профиль</span>
@@ -595,8 +591,8 @@
         <div class="divider" style="text-align: center; font-size: 0.8rem; color: var(--text-muted); margin: 20px 0;">ИЛИ ВОЙТИ ЧЕРЕЗ</div>
         <div class="auth-circles">
             <button class="circle-btn" id="btnGoogle"><svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.7 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg></button>
-            <div id="telegram-login-container" style="display: flex; align-items: center;"></div>
- </div>
+            <div id="telegram-login-container" style="display: flex; align-items: center; min-height: 40px;"></div>
+        </div>
     </div>
 
     <div id="setupSection" class="panel auth-setup-wrapper hidden">
@@ -816,20 +812,22 @@
     PROJECT FACEIT 2026 &copy;
 </footer>
 <script type="module">
-    // Импорты Firebase
+    // ==========================================
+    // ИМПОРТЫ (Все импорты должны быть строго в начале файла)
+    // ==========================================
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { 
-    getAuth, 
-    onAuthStateChanged, 
-    signOut, 
-    signInWithEmailAndPassword, 
-    createUserWithEmailAndPassword, 
-    GoogleAuthProvider, 
-    signInWithPopup 
-} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        getAuth, onAuthStateChanged, signOut, 
+        signInWithEmailAndPassword, createUserWithEmailAndPassword, 
+        GoogleAuthProvider, signInWithPopup, signInAnonymously 
+    } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import { 
+        getFirestore, collection, getDocs, doc, getDoc, 
+        updateDoc, serverTimestamp, onSnapshot, setDoc 
+    } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
+    // Инициализация Firebase
     const firebaseConfig = {
-        // ⚠️ ВСТАВЬ СЮДА СВОИ ДАННЫЕ ОТ FIREBASE ⚠️
         apiKey: "AIzaSyAuQJaKE1GS4D6GbqZfhOtTij-GXIvQF1w",
         authDomain: "project-faceit-22088.firebaseapp.com",
         projectId: "project-faceit-22088",
@@ -842,41 +840,45 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // DOM Элементы
+    // ==========================================
+    // DOM ЭЛЕМЕНТЫ
+    // ==========================================
     const menuToggle = document.getElementById('menuToggle');
     const sideMenu = document.getElementById('sideMenu');
     const menuOverlay = document.getElementById('menuOverlay');
     const menuSearchInput = document.getElementById('menuSearchInput');
     const searchResultsBox = document.getElementById('searchResultsBox');
     
-    // Элементы профиля в меню
     const menuProfileBtn = document.getElementById('menuProfileBtn');
     const menuAvatar = document.getElementById('menuAvatar');
     const menuDisplayName = document.getElementById('menuDisplayName');
     const menuSubName = document.getElementById('menuSubName');
 
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const btnLogin = document.getElementById('btnLogin');
+    const btnRegister = document.getElementById('btnRegister');
+    const btnGoogle = document.getElementById('btnGoogle');
+
     // ==========================================
     // 1. ЛОГИКА БОКОВОГО МЕНЮ И ПОИСКА
     // ==========================================
-    
     function toggleMenu() {
         sideMenu.classList.toggle('open');
         menuOverlay.classList.toggle('active');
         menuToggle.classList.toggle('active');
-        document.body.classList.toggle('menu-open'); // Блокируем скролл фона
+        document.body.classList.toggle('menu-open');
     }
     
     menuToggle.addEventListener('click', toggleMenu);
     menuOverlay.addEventListener('click', toggleMenu);
 
-    // Закрываем окно поиска, если кликнули мимо него
     document.addEventListener('click', (e) => {
         if (!menuSearchInput.contains(e.target) && !searchResultsBox.contains(e.target)) {
             searchResultsBox.classList.remove('active');
         }
     });
 
-    // Живой поиск игроков
     let searchTimeout;
     menuSearchInput.addEventListener('input', (e) => {
         const val = e.target.value.trim().toLowerCase();
@@ -890,7 +892,6 @@
 
         searchTimeout = setTimeout(async () => {
             try {
-                // Получаем всех пользователей (для небольших баз это работает идеально)
                 const usersRef = collection(db, "users");
                 const querySnapshot = await getDocs(usersRef);
                 
@@ -903,13 +904,11 @@
                     const nick = (data.nickname || '').toLowerCase();
                     const gameId = (data.gameId || '').toString();
                     
-                    // Проверяем совпадение по нику или ID
                     if (nick.includes(val) || gameId.includes(val)) {
                         count++;
                         const avatar = data.avatarUrl || `https://ui-avatars.com/api/?name=${data.nickname?.charAt(0) || 'U'}&background=ff2a2a&color=fff`;
                         const clan = data.clanTag ? `[${data.clanTag}] ` : '';
                         
-                        // Создаем карточку игрока, при клике переходим на его профиль
                         resultsHTML += `
                             <div class="search-item" onclick="window.location.href='?uid=${uid}'">
                                 <img src="${avatar}" alt="Аватар">
@@ -932,17 +931,14 @@
             } catch (err) {
                 console.error("Ошибка поиска:", err);
             }
-        }, 300); // Задержка 300мс, чтобы не спамить запросами к БД
+        }, 300);
     });
 
     // ==========================================
     // 2. СТАТУС ОНЛАЙН В РЕАЛЬНОМ ВРЕМЕНИ
     // ==========================================
-    
-    // Функция запуска прослушки статистики
     function initRealtimeStats() {
         const usersRef = collection(db, "users");
-        // onSnapshot будет срабатывать каждый раз, когда кто-то заходит или выходит
         onSnapshot(usersRef, (snapshot) => {
             let onlineCount = 0;
             let totalCount = snapshot.size;
@@ -956,7 +952,6 @@
         });
     }
 
-    // Функция обновления статуса (онлайн/офлайн)
     async function setUserOnlineStatus(uid, isOnline) {
         if (!uid) return;
         try {
@@ -970,7 +965,6 @@
         }
     }
 
-    // При закрытии вкладки или обновлении страницы ставим статус "Офлайн"
     window.addEventListener('beforeunload', () => {
         if (auth.currentUser) {
             setUserOnlineStatus(auth.currentUser.uid, false);
@@ -980,8 +974,6 @@
     // ==========================================
     // 3. АВТОРИЗАЦИЯ И ПОДГРУЗКА ДАННЫХ
     // ==========================================
-    
-    // Загрузка данных в боковое меню
     async function loadMenuProfile(uid) {
         try {
             const docSnap = await getDoc(doc(db, "users", uid));
@@ -991,179 +983,139 @@
                 menuSubName.textContent = "Перейти в профиль";
                 menuAvatar.src = data.avatarUrl || `https://ui-avatars.com/api/?name=${data.nickname?.charAt(0) || 'U'}&background=ff2a2a&color=fff`;
                 
-                // Делаем область кликабельной
                 menuProfileBtn.onclick = () => {
-                    window.location.href = `?uid=${uid}`; // Переход на свой профиль
+                    window.location.href = `?uid=${uid}`; 
                 };
             }
         } catch (e) { console.error(e); }
     }
-// Слушатель состояния авторизации
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        // Пользователь в системе
-        setUserOnlineStatus(user.uid, true);
-        initRealtimeStats();
-        loadMenuProfile(user.uid);
+
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            setUserOnlineStatus(user.uid, true);
+            initRealtimeStats();
+            loadMenuProfile(user.uid);
+            
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('setupSection').classList.add('hidden');
+            document.getElementById('profileSection').classList.remove('hidden');
+        } else {
+            document.getElementById('authSection').classList.remove('hidden');
+            document.getElementById('profileSection').classList.add('hidden');
+            document.getElementById('setupSection').classList.add('hidden');
+            
+            menuDisplayName.textContent = "Авторизуйтесь";
+            menuSubName.textContent = "Войдите для доступа";
+            menuProfileBtn.onclick = null;
+        }
+    });
+
+    btnLogin.addEventListener('click', async () => {
+        const email = emailInput.value.trim();
+        const password = passwordInput.value.trim();
+        if (!email || !password) return alert("Введите email и пароль");
         
-        // Скрываем окно авторизации и показываем профиль
-        document.getElementById('authSection').classList.add('hidden');
-        document.getElementById('setupSection').classList.add('hidden');
-        document.getElementById('profileSection').classList.remove('hidden');
+        try {
+            btnLogin.disabled = true;
+            await signInWithEmailAndPassword(auth, email, password);
+        } catch (error) {
+            alert("Ошибка входа: " + error.message);
+            btnLogin.disabled = false;
+        }
+    });
+
+    btnRegister.addEventListener('click', async () => {
+        const email = emailInput.value.trim();
+        const password = passwordInput.value.trim();
+        if (!email || !password) return alert("Введите email и пароль");
         
-    } else {
-        // Пользователь не авторизован
-        document.getElementById('authSection').classList.remove('hidden');
-        document.getElementById('profileSection').classList.add('hidden');
-        document.getElementById('setupSection').classList.add('hidden');
-        
-        menuDisplayName.textContent = "Авторизуйтесь";
-        menuSubName.textContent = "Войдите для доступа";
-        menuProfileBtn.onclick = null;
-    }
-});
+        try {
+            btnRegister.disabled = true;
+            await createUserWithEmailAndPassword(auth, email, password);
+        } catch (error) {
+            alert("Ошибка регистрации: " + error.message);
+            btnRegister.disabled = false;
+        }
+    });
+
+    const googleProvider = new GoogleAuthProvider();
+    btnGoogle.addEventListener('click', async () => {
+        try {
+            await signInWithPopup(auth, googleProvider);
+        } catch (error) {
+            alert("Ошибка Google: " + error.message);
+        }
+    });
 
     // ==========================================
-    // 4. ТВОИ ОСТАЛЬНЫЕ ФУНКЦИИ 
+    // 4. TELEGRAM AUTH
     // ==========================================
+    const botName = "ProjectFaceitBot"; 
+    const tgContainer = document.getElementById('telegram-login-container');
     
-    // ИСПРАВЛЕННАЯ Логика переключения вкладок (Общая информация / История / Статистика)
+    if (tgContainer) {
+        const script = document.createElement('script');
+        script.async = true;
+        script.src = "https://telegram.org/js/telegram-widget.js?22";
+        script.setAttribute('data-telegram-login', botName);
+        script.setAttribute('data-size', 'large'); 
+        script.setAttribute('data-radius', '25'); 
+        script.setAttribute('data-onauth', 'onTelegramAuth(user)');
+        script.setAttribute('data-request-access', 'write');
+        tgContainer.appendChild(script);
+    }
+
+    window.onTelegramAuth = async function(tgUser) {
+        try {
+            const userCredential = await signInAnonymously(auth);
+            const user = userCredential.user;
+
+            await setDoc(doc(db, "users", user.uid), {
+                telegramId: tgUser.id,
+                nickname: tgUser.username || tgUser.first_name,
+                avatarUrl: tgUser.photo_url || `https://ui-avatars.com/api/?name=${tgUser.first_name.charAt(0)}&background=ff2a2a&color=fff`,
+                isOnline: true
+            }, { merge: true });
+
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('profileSection').classList.remove('hidden');
+            
+        } catch (error) {
+            console.error("Ошибка при входе через Telegram:", error);
+            alert("Не удалось связать Telegram с базой данных.");
+        }
+    };
+
+    // ==========================================
+    // 5. ВКЛАДКИ И КНОПКА ВЫХОДА
+    // ==========================================
     const tabs = document.querySelectorAll('.nav-tabs span');
     const contents = document.querySelectorAll('.tab-content');
     
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
-            // 1. Убираем класс active у всех кнопок вкладок
             tabs.forEach(t => t.classList.remove('active'));
-            
-            // 2. Скрываем все блоки с контентом
             contents.forEach(c => {
                 c.classList.remove('active');
                 c.classList.add('hidden');
             });
-            
-            // 3. Добавляем класс active нажатой вкладке
             tab.classList.add('active');
-            
-            // 4. Показываем нужный блок контента
             const targetContent = document.getElementById(tab.dataset.tab);
             targetContent.classList.remove('hidden');
             targetContent.classList.add('active');
         });
     });
 
-    // Кнопка выхода из аккаунта
     const btnLogout = document.getElementById('btnLogout');
     if (btnLogout) {
         btnLogout.addEventListener('click', async () => {
             if (auth.currentUser) {
-                // Ставим офлайн перед выходом
                 await setUserOnlineStatus(auth.currentUser.uid, false);
                 await signOut(auth);
-                window.location.href = window.location.pathname; // очищаем URL от чужих ?uid
+                window.location.href = window.location.pathname;
             }
         });
     }
-
-    // ... ЗДЕСЬ ВСТАВЬ СВОЙ КОД АВТОРИЗАЦИИ (btnGoogle, btnTelegram, btnSaveSetup и рендер данных профиля) ...
-// DOM Элементы авторизации
-const emailInput = document.getElementById('email');
-const passwordInput = document.getElementById('password');
-const btnLogin = document.getElementById('btnLogin');
-const btnRegister = document.getElementById('btnRegister');
-const btnGoogle = document.getElementById('btnGoogle');
-
-// Авторизация по Email и паролю
-btnLogin.addEventListener('click', async () => {
-    const email = emailInput.value.trim();
-    const password = passwordInput.value.trim();
-    if (!email || !password) return alert("Введите email и пароль");
-    
-    try {
-        btnLogin.disabled = true;
-        await signInWithEmailAndPassword(auth, email, password);
-    } catch (error) {
-        alert("Ошибка входа: " + error.message);
-        btnLogin.disabled = false;
-    }
-});
-
-// Регистрация по Email и паролю
-btnRegister.addEventListener('click', async () => {
-    const email = emailInput.value.trim();
-    const password = passwordInput.value.trim();
-    if (!email || !password) return alert("Введите email и пароль");
-    
-    try {
-        btnRegister.disabled = true;
-        await createUserWithEmailAndPassword(auth, email, password);
-    } catch (error) {
-        alert("Ошибка регистрации: " + error.message);
-        btnRegister.disabled = false;
-    }
-});
-
-// Авторизация через Google
-const googleProvider = new GoogleAuthProvider();
-btnGoogle.addEventListener('click', async () => {
-    try {
-        await signInWithPopup(auth, googleProvider);
-    } catch (error) {
-        alert("Ошибка Google: " + error.message);
-    }
-});
-    // ==========================================
-// АВТОРИЗАЦИЯ ЧЕРЕЗ TELEGRAM (ПРОТОТИП)
-// ==========================================
-
-// ⚠️ ЗАМЕНИ НА USERNAME СВОЕГО БОТА (без @)
-const botName = "ProjectFaceitBot"; 
-
-const tgContainer = document.getElementById('telegram-login-container');
-if (tgContainer) {
-    // Динамически создаем виджет Telegram
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = "https://telegram.org/js/telegram-widget.js?22";
-    script.setAttribute('data-telegram-login', botName);
-    script.setAttribute('data-size', 'large'); // можно 'medium' или 'small'
-    script.setAttribute('data-radius', '25'); // закругляем, чтобы вписывалось в дизайн
-    script.setAttribute('data-onauth', 'onTelegramAuth(user)');
-    script.setAttribute('data-request-access', 'write');
-    tgContainer.appendChild(script);
-}
-
-// Импортируем функцию для анонимного входа
-import { signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-import { setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-
-// Эта функция сработает, когда человек нажмет на виджет и подтвердит вход в Telegram
-window.onTelegramAuth = async function(tgUser) {
-    try {
-        // Логинимся анонимно в Firebase
-        const userCredential = await signInAnonymously(auth);
-        const user = userCredential.user;
-
-        // Сохраняем данные из Telegram в нашу базу данных Firestore
-        await setDoc(doc(db, "users", user.uid), {
-            telegramId: tgUser.id,
-            nickname: tgUser.username || tgUser.first_name,
-            avatarUrl: tgUser.photo_url || `https://ui-avatars.com/api/?name=${tgUser.first_name.charAt(0)}&background=ff2a2a&color=fff`,
-            isOnline: true
-        }, { merge: true });
-
-        // Переключаем экраны
-        document.getElementById('authSection').classList.add('hidden');
-        document.getElementById('profileSection').classList.remove('hidden');
-        
-    } catch (error) {
-        console.error("Ошибка при входе через Telegram:", error);
-        alert("Не удалось связать Telegram с базой данных.");
-    }
-};
-
-
 </script>
 </body>
 </html>
-
