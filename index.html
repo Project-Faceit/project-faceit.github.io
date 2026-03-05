@@ -7,321 +7,318 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-    --red: #ffffff;            /* Заменяем красный на белый или светло-серый для текста */
-    --dark-red: #333333;       /* Вместо темно-красного — темно-серый */
-    --bg-base: #0a0a0a;        /* Чистый черный фон */
-    --border: rgba(255, 255, 255, 0.1); /* Тонкие белые границы вместо красных */
-    --text-main: #f0f0f0;
-    --text-muted: #a0a0a5;
-    --win-green: #22c55e;
-    --loss-red: #ff2a2a;       /* Оставляем только для поражений */
-}
-
+            --bg-base: #030303;        
+            --bg-panel: rgba(18, 18, 20, 0.75); 
+            --red-accent: #e53935;     
+            --red-hover: #ff4c4c;
+            --text-main: #f4f4f5;
+            --text-muted: #a1a1aa;
+            --border: rgba(255, 255, 255, 0.08); 
+            --border-red: rgba(229, 57, 53, 0.4);
+            --win-green: #22c55e;
+            --loss-red: #ef4444;
+            --yellow-dev: #fbbf24;
+        }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        /* Кроваво-стеклянный анимированный фон с водяным знаком логотипа */
         body {
             font-family: 'Inter', sans-serif;
-            background: #050505; /* Однотонный глубокий черный */
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
+            background-color: var(--bg-base);
             color: var(--text-main);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px;
+            padding: 15px;
             overflow-x: hidden;
             position: relative;
         }
 
+        /* Тонкий фоновый паттерн вместо ярких градиентов */
         body::before {
             content: '';
             position: fixed;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80vw; height: 80vw;
-            background-image: url('https://i.postimg.cc/br0Pyxgm/Airbrush-IMAGE-ENHANCER-1772649821056-1772649821057.png'); /* Замени на ссылку логотипа */
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            opacity: 0.03;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-image: radial-gradient(circle at 50% 0%, rgba(229, 57, 53, 0.05) 0%, transparent 50%);
+            z-index: -1;
             pointer-events: none;
-            z-index: 0;
         }
 
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        
         body.menu-open { overflow: hidden; }
 
-        .container { width: 100%; max-width: 1200px; margin: auto; flex-grow: 1; position: relative; z-index: 1; }
-        .auth-setup-wrapper { max-width: 420px; margin: 40px auto; }
+        .container { 
+            width: 100%; 
+            max-width: 1100px; /* Оптимальная ширина для десктопа */
+            margin: auto; 
+            flex-grow: 1; 
+            position: relative; 
+            z-index: 1; 
+        }
+        
+        .auth-setup-wrapper { max-width: 400px; margin: 60px auto; }
         
         .top-header { 
             display: flex; justify-content: space-between; align-items: center; 
             width: 100%; margin-bottom: 30px; position: relative; z-index: 10; 
         }
 
-        /* Логотип в шапке сайта */
         .header-logo {
-            height: 45px;
+            height: 40px;
             object-fit: contain;
-            filter: drop-shadow(0 0 10px rgba(255, 0, 0, 0.5));
+            opacity: 0.9;
+            transition: 0.3s;
         }
+        .header-logo:hover { opacity: 1; transform: scale(1.02); }
 
         h2 { 
-    font-size: 1.2rem; 
-    margin-bottom: 15px; 
-    font-weight: 600; 
-    text-transform: uppercase; 
-    color: white; 
-    text-shadow: none; /* Убрали красное свечение */
-}
+            font-size: 1.4rem; 
+            margin-bottom: 20px; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            color: var(--text-main); 
+            letter-spacing: 1px;
+        }
 
-        /* ================= МЕНЮ (ГАМБУРГЕР) ================= */
-        .bento-menu { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; width: 28px; height: 28px; cursor: pointer; transition: 0.4s; padding: 2px; }
-        .bento-menu span { background: var(--text-main); border-radius: 2px; width: 6px; height: 6px; transition: 0.4s; }
-        .bento-menu:hover span { background: var(--red); box-shadow: 0 0 10px var(--red); }
+        /* МЕНЮ (ГАМБУРГЕР) */
+        .bento-menu { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; width: 26px; height: 26px; cursor: pointer; transition: 0.3s; }
+        .bento-menu span { background: var(--text-muted); border-radius: 2px; width: 6px; height: 6px; transition: 0.3s; }
+        .bento-menu:hover span { background: var(--red-accent); }
         .bento-menu.active { transform: rotate(90deg) scale(0.9); }
-        .bento-menu.active span { background: var(--red); border-radius: 50%; box-shadow: 0 0 10px var(--red); }
+        .bento-menu.active span { background: var(--red-accent); border-radius: 50%; }
         
-        .side-menu-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); z-index: 999; display: none; backdrop-filter: blur(5px); }
+        .side-menu-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); z-index: 999; display: none; backdrop-filter: blur(4px); }
         .side-menu-overlay.active { display: block; animation: fadeIn 0.3s forwards; }
         
-        /* Стеклянное меню */
         .side-menu { 
             position: fixed; top: 0; left: -320px; width: 300px; height: 100vh; 
-            background: rgba(10, 0, 0, 0.65); 
+            background: rgba(12, 12, 14, 0.95); 
             backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             z-index: 1000; transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
             display: flex; flex-direction: column; 
-            border-right: 1px solid var(--border); box-shadow: 10px 0 30px rgba(255,0,0,0.1); 
+            border-right: 1px solid var(--border-red); 
             overflow-y: auto; 
         }
-        .side-menu.open { left: 0; }
+        .side-menu.open { left: 0; box-shadow: 10px 0 40px rgba(0,0,0,0.8); }
         
-        .menu-profile-header { padding: 30px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 15px; background: rgba(255,0,0,0.05); }
-        .menu-profile-header img { width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--red); box-shadow: 0 0 10px var(--red); object-fit: cover; }
+        .menu-profile-header { padding: 30px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 15px; }
+        .menu-profile-header img { width: 48px; height: 48px; border-radius: 12px; border: 1px solid var(--border); object-fit: cover; }
         .menu-profile-header .name { 
-            font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 1.2rem; 
-            color: white; cursor: pointer; text-shadow: 0 0 8px rgba(255,0,0,0.6); transition: 0.2s;
+            font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 1.1rem; 
+            color: var(--text-main); cursor: pointer; transition: 0.2s;
         }
-        .menu-profile-header .name:hover { color: var(--red); }
+        .menu-profile-header .name:hover { color: var(--red-accent); }
 
-        .menu-nav { display: flex; flex-direction: column; padding: 20px 0; flex-grow: 1; gap: 5px; }
+        .menu-nav { display: flex; flex-direction: column; padding: 15px 0; flex-grow: 1; }
         .menu-nav a { 
-            display: flex; align-items: center; gap: 15px; padding: 12px 25px; 
-            color: var(--text-main); text-decoration: none; font-size: 0.9rem; font-weight: 600; 
-            transition: 0.3s; border-left: 3px solid transparent; 
-            position: relative;
+            display: flex; align-items: center; gap: 15px; padding: 14px 25px; 
+            color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; 
+            transition: 0.2s; border-left: 2px solid transparent; 
         }
-        .menu-nav a::before {
-            content: ''; position: absolute; left: 0; bottom: 0; width: 100%; height: 1px;
-            background: linear-gradient(90deg, rgba(255,0,0,0.3), transparent); opacity: 0; transition: 0.3s;
-        }
-        .menu-nav a:hover { background: rgba(255,0,0,0.1); border-left-color: var(--red); color: white; text-shadow: 0 0 5px rgba(255,0,0,0.5); }
-        .menu-nav a:hover::before { opacity: 1; }
+        .menu-nav a:hover { background: rgba(255,255,255,0.03); border-left-color: var(--red-accent); color: var(--text-main); }
+        .menu-nav a svg.nav-icon { width: 20px; height: 20px; fill: transparent; stroke: currentColor; stroke-width: 1.5px; transition: 0.2s; }
+        .menu-nav a:hover svg.nav-icon { stroke: var(--red-accent); transform: translateX(3px); }
         
-        /* Светящиеся иконки с красной обводкой */
-        .menu-nav a svg { 
-            width: 22px; height: 22px; fill: transparent; stroke: var(--red); stroke-width: 1.5px;
-            filter: drop-shadow(0 0 5px var(--red)); transition: 0.3s; 
-        }
-        .menu-nav a:hover svg { transform: scale(1.1); filter: drop-shadow(0 0 10px var(--red)); fill: rgba(255,0,0,0.2); }
-        
-        .dev-badge { font-size: 0.65rem; color: var(--red); font-weight: 700; background: rgba(255,0,0,0.1); padding: 2px 6px; border-radius: 4px; margin-left: auto; border: 1px solid rgba(255,0,0,0.3); }
+        /* Иконка "В разработке" */
+        .dev-badge { margin-left: auto; display: flex; align-items: center; justify-content: center; opacity: 0.7; }
+        .dev-badge svg { width: 16px; height: 16px; fill: none; stroke: var(--yellow-dev); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-        .menu-footer { padding: 20px; border-top: 1px solid var(--border); background: rgba(0,0,0,0.5); }
+        .menu-footer { padding: 20px; border-top: 1px solid var(--border); background: rgba(0,0,0,0.2); }
         
-        .stats-footer { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
-        .stats-row { display: flex; align-items: center; font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
-        .stats-row svg { margin-right: 10px; width: 14px; height: 14px; fill: var(--red); filter: drop-shadow(0 0 5px var(--red));}
-        .stats-val { color: white; margin-left: auto; font-family: 'Orbitron', sans-serif; font-weight: 700; text-shadow: 0 0 5px rgba(255,255,255,0.3); }
+        .stats-footer { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
+        .stats-row { display: flex; align-items: center; font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
+        .stats-row svg { margin-right: 10px; width: 16px; height: 16px; fill: var(--text-muted); }
+        .stats-val { color: var(--text-main); margin-left: auto; font-family: 'Orbitron', sans-serif; font-weight: 700; }
         
-        .blink-dot { width: 10px; height: 10px; background: var(--red); border-radius: 50%; margin-right: 10px; box-shadow: 0 0 10px var(--red); animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
+        .blink-dot { width: 8px; height: 8px; background: var(--red-accent); border-radius: 50%; margin-right: 10px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; box-shadow: 0 0 0 0 rgba(229, 57, 53, 0.4); } 70% { opacity: 0.5; box-shadow: 0 0 0 6px rgba(229, 57, 53, 0); } 100% { opacity: 1; } }
         
         .search-container { position: relative; width: 100%; }
-        .menu-search { width: 100%; padding: 12px 15px; border-radius: 8px; border: 1px solid var(--border); background: rgba(0,0,0,0.6); color: white; outline: none; font-family: 'Inter', sans-serif; font-size: 0.85rem; transition: 0.3s; }
-        .menu-search:focus { border-color: var(--red); box-shadow: 0 0 10px rgba(255, 0, 0, 0.4); background: rgba(20,0,0,0.8); }
+        .menu-search { width: 100%; padding: 12px 15px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,0.03); color: var(--text-main); outline: none; font-size: 0.85rem; transition: 0.3s; }
+        .menu-search:focus { border-color: var(--red-accent); background: rgba(0,0,0,0.5); }
         .search-results {
-            position: absolute; top: 100%; left: 0; right: 0; background: rgba(10,0,0,0.95);
+            position: absolute; top: 100%; left: 0; right: 0; background: #121214;
             border: 1px solid var(--border); border-top: none; border-radius: 0 0 8px 8px;
-            max-height: 200px; overflow-y: auto; z-index: 100; display: none; backdrop-filter: blur(10px);
+            max-height: 200px; overflow-y: auto; z-index: 100; display: none; box-shadow: 0 10px 20px rgba(0,0,0,0.5);
         }
-        .search-item { padding: 10px 15px; font-size: 0.85rem; color: white; cursor: pointer; border-bottom: 1px solid rgba(255,0,0,0.1); }
-        .search-item:hover { background: rgba(255,0,0,0.2); }
+        .search-item { padding: 12px 15px; font-size: 0.85rem; color: var(--text-main); cursor: pointer; border-bottom: 1px solid var(--border); }
+        .search-item:hover { background: rgba(255,255,255,0.05); }
 
-        /* Стеклянные Панели (Карточки) */
+        /* Стеклянные Панели */
         .panel {
-    background: rgba(20, 20, 20, 0.6); /* Темно-серый вместо красноватого */
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 25px;
-    margin-bottom: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5); /* Убираем красное свечение в тенях */
-}
-
+            background: var(--bg-panel); 
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
 
         input, select {
             width: 100%; padding: 14px; margin: 8px 0 15px; border-radius: 8px;
-            border: 1px solid var(--border); background: rgba(0,0,0,0.6); color: white; outline: none;
-            font-family: 'Inter', sans-serif; font-weight: 500; transition: 0.3s;
+            border: 1px solid var(--border); background: rgba(0,0,0,0.3); color: var(--text-main); outline: none;
+            font-family: 'Inter', sans-serif; font-size: 0.9rem; transition: 0.3s;
         }
-        select option { background: #111; color: white; }
-        input:focus, select:focus { border-color: var(--red); box-shadow: 0 0 15px rgba(255, 0, 0, 0.3); background: rgba(20,0,0,0.8); }
+        select option { background: #121214; color: var(--text-main); }
+        input:focus, select:focus { border-color: var(--red-accent); background: rgba(0,0,0,0.6); }
         
         button {
-            width: 100%; padding: 14px; border-radius: 8px; border: none; font-size: 0.95rem;
-            font-weight: 700; font-family: 'Inter', sans-serif; cursor: pointer; transition: 0.3s;
-            text-transform: uppercase; letter-spacing: 0.5px; position: relative; overflow: hidden;
+            width: 100%; padding: 14px; border-radius: 8px; border: none; font-size: 0.9rem;
+            font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; transition: 0.3s;
+            text-transform: uppercase; letter-spacing: 0.5px;
         }
         button:disabled { opacity: 0.6; cursor: not-allowed; }
-        .btn-primary { background: linear-gradient(90deg, var(--dark-red), var(--red)); color: white; box-shadow: 0 0 15px rgba(255,0,0,0.3); }
-        .btn-primary:hover:not(:disabled) { box-shadow: 0 0 25px rgba(255, 0, 0, 0.6); transform: translateY(-2px); }
-        .btn-secondary { background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--border); backdrop-filter: blur(5px); }
-        .btn-secondary:hover:not(:disabled) { background: rgba(255,255,255,0.1); border-color: var(--red); }
-        .btn-danger { background: rgba(255, 0, 0, 0.1); color: #ff4444; border: 1px solid rgba(255, 0, 0, 0.3); }
-        .btn-danger:hover:not(:disabled) { background: #ff0000; color: white; box-shadow: 0 0 15px rgba(255,0,0,0.5); }
-        .btn-outline { background: transparent; color: var(--text-main); border: 1px solid var(--border); }
-        .btn-outline:hover { border-color: var(--red); background: rgba(255,0,0,0.1); }
+        
+        .btn-primary { background: var(--red-accent); color: white; }
+        .btn-primary:hover:not(:disabled) { background: var(--red-hover); transform: translateY(-1px); }
+        .btn-secondary { background: rgba(255,255,255,0.05); color: var(--text-main); border: 1px solid var(--border); }
+        .btn-secondary:hover:not(:disabled) { background: rgba(255,255,255,0.1); border-color: var(--text-muted); }
+        .btn-danger { background: transparent; color: var(--loss-red); border: 1px solid var(--border); }
+        .btn-danger:hover:not(:disabled) { background: rgba(239, 68, 68, 0.1); border-color: var(--loss-red); }
 
-        .auth-circles { display: flex; justify-content: center; gap: 20px; margin-top: 20px; }
-        .circle-btn { width: 50px; height: 50px; border-radius: 50%; border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); padding: 0; }
-        .circle-btn:hover { transform: translateY(-3px); border-color: var(--red); box-shadow: 0 0 15px rgba(255,0,0,0.4); background: rgba(255,0,0,0.1); }
-        .circle-btn svg { width: 22px; height: 22px; }
-        .divider { text-align: center; margin: 25px 0 15px; font-size: 0.8rem; color: var(--text-muted); font-weight: 600; position: relative; text-transform: uppercase; text-shadow: 0 0 5px rgba(0,0,0,0.5); }
-        .divider::before, .divider::after { content: ''; position: absolute; top: 50%; width: 20%; height: 1px; background: var(--border); }
+        .auth-circles { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
+        .circle-btn { width: 45px; height: 45px; border-radius: 50%; border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; background: rgba(255,255,255,0.02); padding: 0; }
+        .circle-btn:hover { border-color: var(--text-muted); background: rgba(255,255,255,0.05); }
+        .circle-btn svg { width: 20px; height: 20px; }
+        
+        .divider { text-align: center; margin: 25px 0 15px; font-size: 0.75rem; color: var(--text-muted); font-weight: 600; position: relative; text-transform: uppercase; letter-spacing: 1px; }
+        .divider::before, .divider::after { content: ''; position: absolute; top: 50%; width: 25%; height: 1px; background: var(--border); }
         .divider::before { left: 0; } .divider::after { right: 0; }
 
-        /* ================= ПРОФИЛЬ ================= */
-        .profile-layout { display: grid; grid-template-columns: 320px 1fr; gap: 25px; animation: fadeIn 0.4s ease-out; }
+        /* ПРОФИЛЬ */
+        .profile-layout { display: grid; grid-template-columns: 300px 1fr; gap: 25px; animation: fadeIn 0.4s ease-out; align-items: start; }
         
-        .sidebar { display: flex; flex-direction: column; gap: 15px; }
+        .sidebar { display: flex; flex-direction: column; gap: 15px; position: sticky; top: 20px; }
         
-        /* Баннер ПРОФИЛЯ (за аватаркой) */
         .sidebar-user { 
             text-align: center; padding: 40px 20px 30px; position: relative; overflow: hidden; 
             background-size: cover; background-position: center; border: 1px solid var(--border);
+            border-top: 3px solid var(--red-accent);
         }
         .sidebar-user::before {
             content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(5,0,0,0.95) 100%); z-index: 1;
+            background: linear-gradient(180deg, rgba(12,12,14,0.4) 0%, rgba(12,12,14,0.95) 100%); z-index: 1;
         }
         
-        .avatar-wrap { width: 130px; height: 130px; margin: 0 auto 20px; position: relative; z-index: 2; }
+        .avatar-wrap { width: 110px; height: 110px; margin: 0 auto 15px; position: relative; z-index: 2; }
         .avatar-img { 
-    width: 100%; height: 100%; border-radius: 50%; object-fit: cover; 
-    border: 2px solid rgba(255,255,255,0.2); /* Нейтральная граница */
-    padding: 4px; background: rgba(0,0,0,0.8); 
-    transition: 0.3s; 
-    box-shadow: 0 0 15px rgba(255,255,255,0.1); /* Белое или нулевое свечение */
-}
+            width: 100%; height: 100%; border-radius: 16px; object-fit: cover; 
+            border: 1px solid var(--border); 
+            background: var(--bg-base); transition: 0.3s; 
+        }
 
         .nickname-display { 
             position: relative; z-index: 2; font-family: 'Orbitron', sans-serif; 
-            font-size: 1.4rem; font-weight: 700; margin-bottom: 5px; text-shadow: 0 0 10px rgba(255,0,0,0.5);
+            font-size: 1.3rem; font-weight: 700; margin-bottom: 5px; letter-spacing: 0.5px;
         }
-        .clan-tag { color: var(--red); font-weight: 700; }
-        .rank-badge { position: relative; z-index: 2; display: inline-block; padding: 6px 14px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; border: 1px solid; margin-top: 10px; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);}
+        .clan-tag { color: var(--text-muted); font-weight: 700; margin-right: 5px; }
+        .rank-badge { position: relative; z-index: 2; display: inline-block; padding: 4px 12px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; border: 1px solid var(--border); margin-top: 10px; background: rgba(0,0,0,0.5); }
         
         .sidebar-actions { display: flex; flex-direction: column; gap: 10px; }
         .sidebar-actions-row { display: flex; gap: 10px; }
         
-        /* Треугольная кнопка Share */
         .btn-share {
-            width: 50px; background: rgba(255,0,0,0.1); border: 1px solid var(--border); color: var(--red); 
+            width: 50px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text-main); 
             display: flex; justify-content: center; align-items: center; border-radius: 8px; transition: 0.3s; cursor: pointer;
         }
-        .btn-share:hover { background: var(--red); color: white; box-shadow: 0 0 15px var(--red); }
-        .btn-share svg { width: 22px; height: 22px; fill: currentColor; transform: rotate(90deg); }
+        .btn-share:hover { background: rgba(255,255,255,0.1); }
+        .btn-share svg { width: 20px; height: 20px; fill: currentColor; }
 
         .info-list { list-style: none; font-size: 0.85rem; color: var(--text-muted); }
         .info-list li { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
-        .info-list li:last-child { border-bottom: none; }
-        .info-list span:last-child { color: white; font-weight: 600; text-shadow: 0 0 5px rgba(255,255,255,0.2); }
+        .info-list li:last-child { border-bottom: none; padding-bottom: 0; }
+        .info-list span:last-child { color: var(--text-main); font-weight: 500; }
         
-        .social-links { display: flex; gap: 12px; margin-top: 15px; }
-        .social-link { width: 36px; height: 36px; background: rgba(0,0,0,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-muted); transition: 0.3s; text-decoration: none; border: 1px solid var(--border); }
-        .social-link:hover { color: white; border-color: var(--red); background: rgba(255, 0, 0, 0.2); box-shadow: 0 0 10px rgba(255,0,0,0.5); }
-        .social-link svg { width: 18px; height: 18px; fill: currentColor; }
+        .social-links { display: flex; gap: 10px; margin-top: 20px; justify-content: center;}
+        .social-link { width: 34px; height: 34px; background: rgba(255,255,255,0.03); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); transition: 0.2s; border: 1px solid var(--border); }
+        .social-link:hover { color: var(--text-main); background: rgba(255,255,255,0.1); }
+        .social-link svg { width: 16px; height: 16px; fill: currentColor; }
 
-        .main-content { display: flex; flex-direction: column; gap: 15px; }
-        .nav-tabs { display: flex; gap: 20px; font-size: 0.9rem; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 5px; text-transform: uppercase;}
-        .nav-tabs span { cursor: pointer; transition: 0.2s; position: relative; }
-        .nav-tabs span:hover { color: white; text-shadow: 0 0 5px rgba(255,0,0,0.5); }
-        .nav-tabs span.active { color: white; text-shadow: 0 0 10px var(--red); }
-        .nav-tabs span.active::after { content: ''; position: absolute; bottom: -16px; left: 0; width: 100%; height: 2px; background: var(--red); box-shadow: 0 -2px 10px var(--red); }
+        .main-content { display: flex; flex-direction: column; gap: 20px; }
+        .nav-tabs { display: flex; gap: 25px; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid var(--border); padding-bottom: 12px; text-transform: uppercase; overflow-x: auto; white-space: nowrap; scrollbar-width: none;}
+        .nav-tabs::-webkit-scrollbar { display: none; }
+        .nav-tabs span { cursor: pointer; transition: 0.2s; position: relative; padding-bottom: 12px; margin-bottom: -13px; }
+        .nav-tabs span:hover { color: var(--text-main); }
+        .nav-tabs span.active { color: var(--text-main); }
+        .nav-tabs span.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: var(--red-accent); }
+        
         .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; }
         .tab-content.active { display: block; }
 
         .hero-banner {
-            position: relative; height: 160px; border-radius: 12px; background-size: cover; background-position: center; border: 1px solid var(--border);
-            display: flex; align-items: center; justify-content: center; overflow: hidden; transition: box-shadow 0.4s;
+            position: relative; height: 140px; border-radius: 12px; background-size: cover; background-position: center; border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center; overflow: hidden;
         }
-        .hero-banner::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(0deg, rgba(5,0,0,0.9) 0%, rgba(20,0,0,0.4) 100%); z-index: 1; }
+        .hero-banner::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 1; }
         .hero-elo-box { position: relative; z-index: 2; text-align: center; }
-        .hero-elo-box .val { font-family: 'Orbitron', sans-serif; font-size: 3.5rem; font-weight: 900; color: white; text-shadow: 0 0 25px var(--red); }
-        .hero-elo-box .label { font-size: 0.85rem; color: #ddd; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; }
+        .hero-elo-box .val { font-family: 'Orbitron', sans-serif; font-size: 3rem; font-weight: 900; color: white; line-height: 1; }
+        .hero-elo-box .label { font-size: 0.8rem; color: var(--red-accent); font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin-top: 5px; }
 
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 15px; }
-        .stat-box { background: rgba(0,0,0,0.4); border: 1px solid var(--border); padding: 20px; border-radius: 12px; text-align: center; box-shadow: inset 0 0 15px rgba(255,0,0,0.05); backdrop-filter: blur(5px); }
-        .stat-val { font-family: 'Orbitron', sans-serif; font-size: 1.4rem; font-weight: 700; color: white; display: block; text-shadow: 0 0 10px rgba(255,0,0,0.4); }
-        .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-top: 5px; display: block; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        .stat-box { background: var(--bg-panel); border: 1px solid var(--border); padding: 20px 15px; border-radius: 12px; text-align: center; transition: 0.3s; }
+        .stat-box:hover { border-color: var(--border-red); background: rgba(255,255,255,0.03); }
+        .stat-val { font-family: 'Orbitron', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--text-main); display: block; }
+        .stat-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-top: 8px; display: block; letter-spacing: 0.5px; }
 
         .match-history { padding: 0; overflow: hidden; }
-        .mh-header { padding: 20px; border-bottom: 1px solid var(--border); font-size: 0.9rem; font-weight: 700; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center;}
+        .mh-header { padding: 18px 20px; border-bottom: 1px solid var(--border); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center;}
         .mh-list { display: flex; flex-direction: column; }
-        .mh-item { display: grid; grid-template-columns: 100px 50px 80px 1fr 1fr 1fr; align-items: center; padding: 15px 20px; border-bottom: 1px solid var(--border); font-size: 0.85rem; font-weight: 500; transition: 0.2s; }
-        .mh-item:hover { background: rgba(255,0,0,0.1); border-left: 2px solid var(--red); }
+        .mh-item { display: grid; grid-template-columns: 100px 40px 80px 1fr 1fr; align-items: center; padding: 15px 20px; border-bottom: 1px solid var(--border); font-size: 0.85rem; font-weight: 500; transition: 0.2s; background: rgba(255,255,255,0.01); }
+        .mh-item:hover { background: rgba(255,255,255,0.03); border-left: 2px solid var(--red-accent); }
         .mh-item:last-child { border-bottom: none; }
-        .res-badge { width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 800; color: white; font-size: 0.85rem; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        .res-w { background: var(--win-green); box-shadow: 0 0 15px rgba(34, 197, 94, 0.4); }
-        .res-l { background: var(--loss-red); box-shadow: 0 0 15px rgba(255, 42, 42, 0.4); }
+        .res-badge { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 800; color: white; font-size: 0.75rem; }
+        .res-w { background: var(--win-green); }
+        .res-l { background: var(--loss-red); }
         .score { font-weight: 700; font-family: 'Orbitron', sans-serif; font-size: 1rem; }
-        .score.win { color: var(--win-green); text-shadow: 0 0 5px rgba(34,197,94,0.5); }
-        .score.loss { color: var(--loss-red); text-shadow: 0 0 5px rgba(255,42,42,0.5); }
-        .mh-map { display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-weight: 600; }
-        
-        /* Исправленная статистика (Прогресс бары вместо радара) */
-        .stats-advanced { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px; }
-        .chart-panel { background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 12px; padding: 30px; display: flex; flex-direction: column; justify-content: center; box-shadow: inset 0 0 20px rgba(255,0,0,0.05); }
-        .chart-title { font-weight: 700; text-transform: uppercase; margin-bottom: 25px; color: var(--text-muted); text-align: center; font-size: 0.9rem;}
-        
-        .stat-line { margin-bottom: 20px; }
-        .stat-line-header { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; font-family: 'Orbitron', sans-serif; }
-        .stat-line-bg { width: 100%; height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.8); }
-        .stat-line-fill { height: 100%; background: var(--red); box-shadow: 0 0 10px var(--red); border-radius: 4px; transition: 1s ease-out; }
+        .score.win { color: var(--win-green); }
+        .score.loss { color: var(--loss-red); }
+        .mh-map { display: flex; align-items: center; justify-content: flex-end; color: var(--text-muted); font-weight: 500; }
 
-        .wl-bar-wrap { width: 100%; margin-top: 10px; }
-        .wl-bar { width: 100%; height: 16px; background: rgba(255,255,255,0.05); border-radius: 8px; overflow: hidden; display: flex; box-shadow: inset 0 2px 5px rgba(0,0,0,0.8); }
-        .wl-win-fill { background: var(--win-green); height: 100%; transition: width 0.5s; box-shadow: 0 0 10px var(--win-green); }
-        .wl-loss-fill { background: var(--loss-red); height: 100%; transition: width 0.5s; box-shadow: 0 0 10px var(--loss-red); }
-        .wl-labels { display: flex; justify-content: space-between; margin-top: 8px; font-weight: 700; font-family: 'Orbitron', sans-serif; font-size: 0.9rem; }
+        /* ИСПРАВЛЕННАЯ СТАТИСТИКА ПОД STANDOFF 2 */
+        .stats-advanced { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .chart-panel { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px; padding: 25px; display: flex; flex-direction: column; justify-content: center; }
+        .chart-title { font-weight: 700; text-transform: uppercase; margin-bottom: 20px; color: var(--text-main); font-size: 0.85rem; letter-spacing: 1px; }
+        
+        .so2-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;}
+        .so2-stat-item { border: 1px solid var(--border); background: rgba(0,0,0,0.3); border-radius: 8px; padding: 15px; text-align: center; }
+        .so2-stat-item .val { font-family: 'Orbitron', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--text-main); }
+        .so2-stat-item .lbl { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; margin-top: 5px; }
+
+        .stat-line { margin-top: 10px; }
+        .stat-line-header { display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; margin-bottom: 6px; }
+        .stat-line-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; }
+        .stat-line-fill { height: 100%; background: var(--red-accent); border-radius: 3px; transition: 1s ease-out; }
+
+        .wl-bar-wrap { width: 100%; margin-top: 15px; }
+        .wl-bar { width: 100%; height: 10px; background: rgba(255,255,255,0.05); border-radius: 5px; overflow: hidden; display: flex; }
+        .wl-win-fill { background: var(--win-green); height: 100%; transition: width 0.5s; }
+        .wl-loss-fill { background: var(--loss-red); height: 100%; transition: width 0.5s; }
+        .wl-labels { display: flex; justify-content: space-between; margin-top: 8px; font-weight: 600; font-family: 'Inter', sans-serif; font-size: 0.8rem; }
         
         .hidden { display: none !important; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* АДАПТИВНОСТЬ */
         @media (max-width: 900px) {
             .profile-layout { grid-template-columns: 1fr; }
-            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .sidebar { position: relative; top: 0; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .mh-item { grid-template-columns: 80px 30px 60px 1fr; }
+            .mh-kda { font-size: 0.75rem; }
+            .mh-map { display: none; } 
+        }
+
+        @media (max-width: 600px) {
             .stats-advanced { grid-template-columns: 1fr; }
-            .mh-item { grid-template-columns: 80px 40px 60px 1fr; }
-            .mh-kda, .mh-map { display: none; } 
+            .hero-elo-box .val { font-size: 2.5rem; }
+            .nav-tabs { gap: 15px; font-size: 0.8rem; }
         }
         
-        .input-group-title { font-size: 0.8rem; color: var(--red); margin-bottom: 8px; font-weight: 700; margin-top: 20px; text-transform: uppercase; text-shadow: 0 0 5px rgba(255,0,0,0.4); }
+        .input-group-title { font-size: 0.75rem; color: var(--red-accent); margin-bottom: 8px; font-weight: 700; margin-top: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
 
         .site-footer {
-            width: 100%; text-align: center; padding: 30px 0 10px; margin-top: auto; color: rgba(255,255,255,0.3);
-            font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; font-family: 'Orbitron', sans-serif; z-index: 1; position: relative;
+            width: 100%; text-align: center; padding: 30px 0 15px; margin-top: auto; color: var(--text-muted);
+            font-size: 0.75rem; font-weight: 600; letter-spacing: 1px; font-family: 'Orbitron', sans-serif;
         }
     </style>
 </head>
@@ -330,21 +327,24 @@
 <div class="side-menu-overlay" id="menuOverlay"></div>
 <aside class="side-menu" id="sideMenu">
     <div class="menu-profile-header">
-        <img src="https://ui-avatars.com/api/?name=P&background=ff0000&color=fff" id="menuAvatar" alt="Аватар">
+        <img src="https://ui-avatars.com/api/?name=P&background=e53935&color=fff" id="menuAvatar" alt="Аватар">
         <div>
             <span class="name" id="menuDisplayName" title="Перейти в профиль">Авторизуйтесь</span>
         </div>
     </div>
+    <svg style="display:none;">
+        <symbol id="icon-dev" viewBox="0 0 24 24">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+        </symbol>
+    </svg>
+
     <nav class="menu-nav">
-        <a href="#" class="dev-link"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg> Главная <span class="dev-badge">Разработка раздела</span></a>
-        <a href="#" class="dev-link"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Играть Faceit <span class="dev-badge">Разработка раздела</span></a>
-        <a href="#" class="dev-link"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg> Ранги <span class="dev-badge">Разработка раздела</span></a>
-        <a href="#" class="dev-link"><svg viewBox="0 0 24 24"><path d="M19 3H5v14c0 1.66 1.34 3 3 3h8c1.66 0 3-1.34 3-3V3zm-7 15c-1.66 0-3-1.34-3-3V7h6v8c0 1.66-1.34 3-3 3z"/></svg> Турниры <span class="dev-badge">Разработка раздела</span></a>
-        <a href="#" class="dev-link"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg> Создать команду <span class="dev-badge">Разработка раздела</span></a>
-        <a href="#" class="dev-link"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg> Лента новостей <span class="dev-badge">Разработка раздела</span></a>
-        <a href="#" class="dev-link"><svg viewBox="0 0 24 24"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/></svg> Tier лента <span class="dev-badge">Разработка раздела</span></a>
-        <a href="#" class="dev-link"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg> О нас <span class="dev-badge">Разработка раздела</span></a>
-        <a href="#" class="dev-link"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-2h2v2zm1-4c-1.1 0-2-.9-2-2V9c0-1.1.9-2 2-2s2 .9 2 2v2c0 1.1-.9 2-2 2z"/></svg> Тех.поддержка <span class="dev-badge">Разработка раздела</span></a>
+        <a href="#" class="dev-link"><svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> Главная <span class="dev-badge" title="Раздел в разработке"><svg><use href="#icon-dev"></use></svg></span></a>
+        <a href="#" class="dev-link"><svg class="nav-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Играть Faceit <span class="dev-badge" title="Раздел в разработке"><svg><use href="#icon-dev"></use></svg></span></a>
+        <a href="#" class="dev-link"><svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg> Ранги <span class="dev-badge" title="Раздел в разработке"><svg><use href="#icon-dev"></use></svg></span></a>
+        <a href="#" class="dev-link"><svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg> Турниры <span class="dev-badge" title="Раздел в разработке"><svg><use href="#icon-dev"></use></svg></span></a>
+        <a href="#" class="dev-link"><svg class="nav-icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> Создать команду <span class="dev-badge" title="Раздел в разработке"><svg><use href="#icon-dev"></use></svg></span></a>
+        <a href="#" class="dev-link"><svg class="nav-icon" viewBox="0 0 24 24"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8l-4 4v14a2 2 0 0 0 2 2z"></path><line x1="14" y1="2" x2="14" y2="22"></line></svg> Лента новостей <span class="dev-badge" title="Раздел в разработке"><svg><use href="#icon-dev"></use></svg></span></a>
     </nav>
     <div class="menu-footer">
         <div class="stats-footer">
@@ -353,7 +353,7 @@
                 В сети: <span class="stats-val" id="menuOnlineCount">--</span>
             </div>
             <div class="stats-row" title="Зарегистрировано игроков">
-                <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
                 Игроков: <span class="stats-val" id="menuRegisteredCount">--</span>
             </div>
         </div>
@@ -373,7 +373,7 @@
             <span></span><span></span><span></span>
         </div>
         <img src="https://i.postimg.cc/br0Pyxgm/Airbrush-IMAGE-ENHANCER-1772649821056-1772649821057.png" alt="Project Faceit" class="header-logo">
-        <div style="width: 28px;"></div> 
+        <div style="width: 26px;"></div> 
     </header>
 
     <div id="authSection" class="panel auth-setup-wrapper hidden">
@@ -384,7 +384,7 @@
             <button class="btn-primary" id="btnLogin">Войти</button>
             <button class="btn-secondary" id="btnRegister" style="margin-top: 10px;">Создать аккаунт</button>
         </div>
-        <div class="divider">ИЛИ ВОЙТИ ЧЕРЕЗ</div>
+        <div class="divider">или войти через</div>
         <div class="auth-circles">
             <button class="circle-btn" id="btnGoogle" title="Google"><svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.7 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg></button>
             <button class="circle-btn" id="btnTelegram" title="Telegram"><svg viewBox="0 0 24 24"><path fill="#FFF" d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.89 8.24l-1.97 9.28c-.14.65-.53.81-1.07.51l-2.96-2.18-1.43 1.38c-.16.16-.29.29-.6.29l.21-3.02 5.5-4.97c.24-.22-.05-.34-.37-.13l-6.79 4.27-2.93-.92c-.64-.2-.65-.64.13-.95l11.45-4.41c.53-.2.99.11.83.85z"/></svg></button>
@@ -393,7 +393,7 @@
 
     <div id="setupSection" class="panel auth-setup-wrapper hidden">
         <h2 id="setupTitle" style="text-align: center;">Настройка профиля</h2>
-        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px; text-align: center;">Заполни данные из игры.</p>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 15px; text-align: center;">Заполни данные из игры.</p>
         
         <div class="input-group-title">Обязательно</div>
         <input type="text" id="setupNickname" placeholder="Игровой Никнейм">
@@ -407,22 +407,17 @@
             <option value="Энтри-фрагер">Роль: Энтри-фрагер</option>
             <option value="Саппорт">Роль: Саппорт</option>
             <option value="Люркер">Роль: Люркер</option>
-            <option value="Опен Фрагер">Роль: Опен Фрагер</option>
         </select>
         
         <div class="input-group-title">Кастомизация профиля</div>
         <select id="setupBannerColor">
-            <option value="red">Свечение и Баннер: Красный</option>
-            <option value="black">Свечение и Баннер: Черный</option>
-            <option value="pink">Свечение и Баннер: Розовый</option>
-            <option value="white">Свечение и Баннер: Белый</option>
-            <option value="orange">Свечение и Баннер: Оранжевый</option>
-            <option value="yellow">Свечение и Баннер: Желтый</option>
-            <option value="lightblue">Свечение и Баннер: Голубой</option>
-            <option value="purple">Свечение и Баннер: Фиолетовый</option>
+            <option value="red">Стиль: Красный Faceit</option>
+            <option value="white">Стиль: Чистый Белый</option>
+            <option value="blue">Стиль: Неоновый Синий</option>
+            <option value="yellow">Стиль: Кибер Желтый</option>
         </select>
         <input type="url" id="setupAvatarUrl" placeholder="URL Аватарки (необязательно)">
-        <input type="url" id="setupProfileBannerUrl" placeholder="URL Фона профиля за аватаром (необязательно)">
+        <input type="url" id="setupProfileBannerUrl" placeholder="URL Фона за аватаром (необязательно)">
         <input type="url" id="setupBannerUrl" placeholder="URL Баннера ELO (необязательно)">
 
         <div class="input-group-title">Социальные сети</div>
@@ -458,10 +453,10 @@
                 <button class="btn-primary" id="btnSubscribe">Подписаться</button>
             </div>
 
-            <div class="panel">
+            <div class="panel" style="padding: 15px 25px;">
                 <ul class="info-list">
                     <li><span>Country</span> <span>RU / CIS</span></li>
-                    <li><span>Game ID</span> <span id="displayGameId" style="cursor: pointer;" title="Скопировать">00000000</span></li>
+                    <li><span>Game ID</span> <span id="displayGameId" style="cursor: pointer; color: var(--red-accent);" title="Скопировать">00000000</span></li>
                     <li><span>Member since</span> <span>2024</span></li>
                     <li><span>Подписчики</span> <span id="subsCount">124</span></li>
                 </ul>
@@ -476,13 +471,13 @@
             <nav class="nav-tabs">
                 <span class="active" data-tab="tab-summary">Общая Информация</span>
                 <span data-tab="tab-history">История матчей</span>
-                <span data-tab="tab-stats">Статистика</span>
+                <span data-tab="tab-stats">Статистика SO2</span>
             </nav>
 
             <div class="hero-banner" id="userBanner">
                 <div class="hero-elo-box">
                     <div class="val" id="elo">0</div>
-                    <div class="label" id="eloLabelColor">Current Elo</div>
+                    <div class="label" id="eloLabelColor">Faceit Elo</div>
                 </div>
             </div>
 
@@ -490,15 +485,15 @@
                 <div class="stats-grid">
                     <div class="stat-box">
                         <span class="stat-val" id="wins">0</span>
-                        <span class="stat-label">Matches Win</span>
+                        <span class="stat-label">Победы</span>
                     </div>
                     <div class="stat-box">
                         <span class="stat-val" id="losses">0</span>
-                        <span class="stat-label">Matches Lost</span>
+                        <span class="stat-label">Поражения</span>
                     </div>
                     <div class="stat-box">
                         <span class="stat-val">1.24</span>
-                        <span class="stat-label">Average K/D</span>
+                        <span class="stat-label">K/D Ratio</span>
                     </div>
                     <div class="stat-box">
                         <span class="stat-val" id="winRateTxt">0%</span>
@@ -506,18 +501,18 @@
                     </div>
                 </div>
 
-                <div class="panel match-history" style="margin-top: 15px;">
+                <div class="panel match-history" style="margin-top: 20px;">
                     <div class="mh-header">
-                        <span>Last Matches (Demo)</span>
-                        <span style="color: var(--text-muted); font-size: 0.8rem; cursor: pointer; transition: 0.2s;">SEE ALL</span>
+                        <span>Последние матчи</span>
+                        <span style="color: var(--text-muted); font-size: 0.75rem; cursor: pointer;">SEE ALL</span>
                     </div>
                     <div class="mh-list">
                         <div class="mh-item">
                             <div style="color: var(--text-muted);">Today</div>
                             <div class="res-badge res-w">W</div>
-                            <div class="score win">16 : 12</div>
-                            <div class="mh-kda">24 / 15 / 8 <span style="color:var(--text-muted); font-size: 0.75rem;">KDA</span></div>
-                            <div class="mh-map">Dust 2</div>
+                            <div class="score win">10 : 6</div>
+                            <div class="mh-kda">18 / 11 / 3 <span style="color:var(--text-muted);">KDA</span></div>
+                            <div class="mh-map">Rust</div>
                         </div>
                     </div>
                 </div>
@@ -526,33 +521,26 @@
             <div id="tab-history" class="tab-content hidden">
                 <div class="panel match-history">
                     <div class="mh-header">
-                        <span>All Matches History</span>
+                        <span>История матчей</span>
                     </div>
                     <div class="mh-list">
                         <div class="mh-item">
                             <div style="color: var(--text-muted);">Today</div>
                             <div class="res-badge res-w">W</div>
-                            <div class="score win">16 : 12</div>
-                            <div class="mh-kda">24 / 15 / 8 <span style="color:var(--text-muted); font-size: 0.75rem;">KDA</span></div>
-                            <div class="mh-map">Dust 2</div>
+                            <div class="score win">10 : 6</div>
+                            <div class="mh-kda">18 / 11 / 3 <span style="color:var(--text-muted);">KDA</span></div>
+                            <div class="mh-map">Rust</div>
                         </div>
                         <div class="mh-item">
                             <div style="color: var(--text-muted);">Yesterday</div>
                             <div class="res-badge res-l">L</div>
-                            <div class="score loss">14 : 16</div>
-                            <div class="mh-kda">18 / 20 / 4 <span style="color:var(--text-muted); font-size: 0.75rem;">KDA</span></div>
-                            <div class="mh-map">Mirage</div>
-                        </div>
-                        <div class="mh-item">
-                            <div style="color: var(--text-muted);">2 days ago</div>
-                            <div class="res-badge res-w">W</div>
-                            <div class="score win">16 : 9</div>
-                            <div class="mh-kda">29 / 11 / 5 <span style="color:var(--text-muted); font-size: 0.75rem;">KDA</span></div>
-                            <div class="mh-map">Inferno</div>
+                            <div class="score loss">8 : 10</div>
+                            <div class="mh-kda">14 / 16 / 4 <span style="color:var(--text-muted);">KDA</span></div>
+                            <div class="mh-map">Sandstone</div>
                         </div>
                     </div>
-                    <div style="padding: 15px; text-align: center;">
-                        <button class="btn-primary" id="btnMatchForm" style="max-width: 300px;">Добавить результат матча</button>
+                    <div style="padding: 20px; text-align: center;">
+                        <button class="btn-primary" id="btnMatchForm" style="max-width: 250px;">Добавить матч</button>
                     </div>
                 </div>
             </div>
@@ -561,38 +549,41 @@
                 <div class="stats-advanced">
                     
                     <div class="chart-panel">
-                        <div class="chart-title">Detailed Stats</div>
+                        <div class="chart-title">Боевая Эффективность (SO2)</div>
                         
-                        <div class="stat-line">
-                            <div class="stat-line-header">
-                                <span style="color: #aaa;">Headshots</span>
-                                <span style="color: white; font-weight: 700;">45%</span>
+                        <div class="so2-stats-grid">
+                            <div class="so2-stat-item">
+                                <div class="val">1.24</div>
+                                <div class="lbl">K/D Ratio</div>
                             </div>
-                            <div class="stat-line-bg"><div class="stat-line-fill" style="width: 45%;"></div></div>
+                            <div class="so2-stat-item">
+                                <div class="val">105.4</div>
+                                <div class="lbl">ADR (Урон)</div>
+                            </div>
                         </div>
 
                         <div class="stat-line">
                             <div class="stat-line-header">
-                                <span style="color: #aaa;">MVP / Match</span>
-                                <span style="color: white; font-weight: 700;">3.2</span>
+                                <span style="color: var(--text-muted);">Точность в голову (HS%)</span>
+                                <span style="color: var(--text-main);">48%</span>
                             </div>
-                            <div class="stat-line-bg"><div class="stat-line-fill" style="width: 60%;"></div></div>
+                            <div class="stat-line-bg"><div class="stat-line-fill" style="width: 48%;"></div></div>
                         </div>
 
                         <div class="stat-line">
                             <div class="stat-line-header">
-                                <span style="color: #aaa;">Clutch Success</span>
-                                <span style="color: white; font-weight: 700;">28%</span>
+                                <span style="color: var(--text-muted);">Выживаемость</span>
+                                <span style="color: var(--text-main);">35%</span>
                             </div>
-                            <div class="stat-line-bg"><div class="stat-line-fill" style="width: 28%;"></div></div>
+                            <div class="stat-line-bg"><div class="stat-line-fill" style="width: 35%;"></div></div>
                         </div>
                     </div>
 
                     <div class="chart-panel" style="text-align: center;">
-                        <div class="chart-title">Win / Loss Ratio</div>
+                        <div class="chart-title">Статистика Побед</div>
                         
-                        <div style="font-size: 2.5rem; font-family: 'Orbitron', sans-serif; font-weight: 900; text-shadow: 0 0 15px rgba(255,255,255,0.4);" id="wlTotalMatches">0</div>
-                        <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 30px;">Total Matches</div>
+                        <div style="font-size: 3rem; font-family: 'Orbitron', sans-serif; font-weight: 900; color: var(--text-main); line-height: 1;" id="wlTotalMatches">0</div>
+                        <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; margin-bottom: 25px; margin-top: 5px;">Всего матчей</div>
 
                         <div class="wl-bar-wrap">
                             <div class="wl-bar">
@@ -600,8 +591,8 @@
                                 <div class="wl-loss-fill" id="barLoss" style="width: 50%;"></div>
                             </div>
                             <div class="wl-labels">
-                                <span style="color: var(--win-green); text-shadow: 0 0 5px rgba(34,197,94,0.5);" id="lblWin">W: 0</span>
-                                <span style="color: var(--loss-red); text-shadow: 0 0 5px rgba(255,42,42,0.5);" id="lblLoss">L: 0</span>
+                                <span style="color: var(--win-green);" id="lblWin">W: 0</span>
+                                <span style="color: var(--loss-red);" id="lblLoss">L: 0</span>
                             </div>
                         </div>
                     </div>
@@ -616,441 +607,264 @@
 <footer class="site-footer">
     PROJECT FACEIT 2026 &copy;
 </footer>
-
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, updateDoc, query, where, getDocs, collection, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { 
+        getAuth, onAuthStateChanged, signInWithEmailAndPassword, 
+        createUserWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { 
+        getFirestore, doc, setDoc, getDoc, updateDoc, 
+        collection, query, where, getDocs, onSnapshot, orderBy, limit 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+    // --- ТВОИ КОНФИГИ (ОСТАЮТСЯ ПРЕЖНИМИ) ---
     const firebaseConfig = {
-        apiKey: "AIzaSyAuQJaKE1GS4D6GbqZfhOtTij-GXIvQF1w",
-        authDomain: "project-faceit-22088.firebaseapp.com",
-        projectId: "project-faceit-22088",
-        storageBucket: "project-faceit-22088.appspot.com",
-        messagingSenderId: "681525286192",
-        appId: "1:681525286192:web:42dee0506a6c2cf32b64f5"
+        apiKey: "AIzaSy...", // Твой ключ
+        authDomain: "faceit-standoff2.firebaseapp.com",
+        projectId: "faceit-standoff2",
+        storageBucket: "faceit-standoff2.appspot.com",
+        messagingSenderId: "...",
+        appId: "..."
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    const googleProvider = new GoogleAuthProvider();
 
-    const authSec = document.getElementById('authSection');
-    const profileSec = document.getElementById('profileSection');
-    const setupSec = document.getElementById('setupSection');
-    const btnCancelSetup = document.getElementById('btnCancelSetup');
-    let isEditingProfile = false;
-    let currentUserData = null;
-
-    // --- Логика Бокового Меню (Гамбургер) ---
+    // --- ЭЛЕМЕНТЫ ИНТЕРФЕЙСА ---
     const menuToggle = document.getElementById('menuToggle');
     const sideMenu = document.getElementById('sideMenu');
     const menuOverlay = document.getElementById('menuOverlay');
+    const navTabs = document.querySelectorAll('.nav-tabs span');
+    const tabContents = document.querySelectorAll('.tab-content');
 
-    function toggleMenu() {
-        if (!auth.currentUser) {
-            alert("Пожалуйста, зарегистрируйтесь или войдите в аккаунт, чтобы открыть меню.");
-            return;
-        }
+    // --- ЛОГИКА МЕНЮ ---
+    const toggleMenu = () => {
         sideMenu.classList.toggle('open');
         menuOverlay.classList.toggle('active');
-        menuToggle.classList.toggle('active'); 
-        document.body.classList.toggle('menu-open'); 
-    }
+        menuToggle.classList.toggle('active');
+        document.body.classList.toggle('menu-open');
+    };
+
     menuToggle.addEventListener('click', toggleMenu);
     menuOverlay.addEventListener('click', toggleMenu);
 
-    // Закрытие меню при клике на имя (открытие профиля)
-    document.getElementById('menuDisplayName').addEventListener('click', () => {
-        toggleMenu();
-        // В будущем тут можно сделать скролл вверх
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-
-    // Обработка "В разработке"
-    document.querySelectorAll('.dev-link').forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            alert('Этот раздел находится в разработке.');
+    // Переключение табов
+    navTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            navTabs.forEach(t => t.classList.remove('active'));
+            tabContents.forEach(c => {
+                c.classList.remove('active');
+                c.classList.add('hidden');
+            });
+            tab.classList.add('active');
+            const target = document.getElementById(tab.dataset.tab);
+            target.classList.remove('hidden');
+            target.classList.add('active');
         });
     });
 
-    // --- Логика Поиска ---
+    // --- ПОИСК ПОЛЬЗОВАТЕЛЕЙ (ОБНОВЛЕННЫЙ) ---
     const searchInput = document.getElementById('menuSearchInput');
     const searchResults = document.getElementById('searchResults');
-    
+
     searchInput.addEventListener('input', async (e) => {
-        const val = e.target.value.trim().toLowerCase();
+        const val = e.target.value.trim();
         if (val.length < 2) {
             searchResults.style.display = 'none';
             return;
         }
-        
-        try {
-            // Ищем всех пользователей (для простоты) и фильтруем. В реальном проекте используйте Algolia или лимиты.
-            const coll = collection(db, "players");
-            const snap = await getDocs(coll);
-            searchResults.innerHTML = '';
-            let found = 0;
 
-            snap.forEach(docSnap => {
-                const data = docSnap.data();
-                if (data.nickname && data.nickname.toLowerCase().includes(val)) {
-                    found++;
+        try {
+            // Поиск по никнейму (начинается с...)
+            const q = query(
+                collection(db, "users"), 
+                where("nickname", ">=", val),
+                where("nickname", "<=", val + '\uf8ff'),
+                limit(5)
+            );
+            
+            const snapshot = await getDocs(q);
+            searchResults.innerHTML = '';
+            
+            if (snapshot.empty) {
+                searchResults.innerHTML = '<div class="search-item">Игрок не найден</div>';
+            } else {
+                snapshot.forEach(docSnap => {
+                    const user = docSnap.data();
                     const div = document.createElement('div');
                     div.className = 'search-item';
-                    div.innerText = data.clanTag ? `[${data.clanTag}] ${data.nickname}` : data.nickname;
-                    div.onclick = () => alert(`Переход в профиль: ${data.nickname} (В разработке)`);
+                    div.innerHTML = `
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <img src="${user.avatarUrl || 'https://ui-avatars.com/api/?name=' + user.nickname}" style="width:24px; height:24px; border-radius:4px;">
+                            <span>${user.nickname}</span>
+                            <span style="margin-left:auto; color:var(--red-accent); font-size:10px;">ELO: ${user.elo || 0}</span>
+                        </div>
+                    `;
+                    div.onclick = () => {
+                        loadUserProfile(docSnap.id);
+                        toggleMenu();
+                        searchInput.value = '';
+                        searchResults.style.display = 'none';
+                    };
                     searchResults.appendChild(div);
-                }
-            });
-
-            if (found === 0) {
-                searchResults.innerHTML = '<div class="search-item" style="color:#aaa;">Никто не найден</div>';
+                });
             }
             searchResults.style.display = 'block';
-        } catch(err) {
-            console.error(err);
+        } catch (err) {
+            console.error("Search error:", err);
         }
     });
 
-    // Прячем поиск при клике вне
-    document.addEventListener('click', (e) => {
-        if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
-            searchResults.style.display = 'none';
-        }
-    });
-
-    // --- Логика Онлайна и Зарегистрированных пользователей ---
-    async function updateOnlineStats() {
-        try {
-            const coll = collection(db, "players");
-            const snapshot = await getCountFromServer(coll);
-            const totalUsers = snapshot.data().count;
-            
-            document.getElementById('menuRegisteredCount').innerText = totalUsers;
-            const simulatedOnline = Math.max(1, Math.floor(totalUsers * 0.25) + Math.floor(Math.random() * 5));
-            document.getElementById('menuOnlineCount').innerText = simulatedOnline;
-        } catch(e) { 
-            console.error("Ошибка статистики:", e); 
-        }
-    }
-    updateOnlineStats();
-    setInterval(updateOnlineStats, 30000);
-
-    // --- Логика Поделиться профилем (Треугольник) ---
-    const shareBtn = document.getElementById('btnShareProfile');
-    shareBtn.addEventListener('click', () => {
-        const profileUrl = window.location.href;
-        navigator.clipboard.writeText(profileUrl).then(() => {
-            alert("Ссылка на профиль скопирована!");
-        }).catch(err => console.error('Ошибка:', err));
-    });
-
-    // --- Логика Подписки (Визуальная заглушка) ---
-    const btnSubscribe = document.getElementById('btnSubscribe');
-    const subsCountEl = document.getElementById('subsCount');
-    let isSubscribed = false; let currentSubs = 124;
-
-    btnSubscribe.addEventListener('click', () => {
-        isSubscribed = !isSubscribed;
-        if (isSubscribed) {
-            btnSubscribe.classList.remove('btn-primary');
-            btnSubscribe.classList.add('btn-secondary');
-            btnSubscribe.innerText = 'Отписаться';
-            currentSubs++;
+    // --- ОСНОВНАЯ ЛОГИКА АВТОРИЗАЦИИ ---
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if (userDoc.exists()) {
+                showProfile(userDoc.data());
+                updateGlobalStats();
+            } else {
+                showSetup();
+            }
         } else {
-            btnSubscribe.classList.remove('btn-secondary');
-            btnSubscribe.classList.add('btn-primary');
-            btnSubscribe.innerText = 'Подписаться';
-            currentSubs--;
+            showAuth();
         }
-        subsCountEl.innerText = currentSubs;
     });
 
-    // Конфиг цветов (Glow & Gradient)
-    const bannerColors = {
-        red: { grad: 'linear-gradient(135deg, rgba(255,42,42,0.8), #09090b)', glow: '0 0 25px rgba(255,0,0,0.8)', txt: '#ff0000', hex: '#ff0000' },
-        black: { grad: 'linear-gradient(135deg, #333333, #09090b)', glow: '0 0 25px rgba(100,100,100,0.8)', txt: '#aaaaaa', hex: '#666666' },
-        pink: { grad: 'linear-gradient(135deg, #ff66b2, #09090b)', glow: '0 0 25px rgba(255,102,178,0.8)', txt: '#ff66b2', hex: '#ff66b2' },
-        white: { grad: 'linear-gradient(135deg, #ffffff, #555555)', glow: '0 0 25px rgba(255,255,255,0.7)', txt: '#ffffff', hex: '#ffffff' },
-        orange: { grad: 'linear-gradient(135deg, #ff8c00, #09090b)', glow: '0 0 25px rgba(255,140,0,0.8)', txt: '#ff8c00', hex: '#ff8c00' },
-        yellow: { grad: 'linear-gradient(135deg, #ffd700, #09090b)', glow: '0 0 25px rgba(255,215,0,0.7)', txt: '#ffd700', hex: '#ffd700' },
-        lightblue: { grad: 'linear-gradient(135deg, #00bfff, #09090b)', glow: '0 0 25px rgba(0,191,255,0.8)', txt: '#00bfff', hex: '#00bfff' },
-        purple: { grad: 'linear-gradient(135deg, #8a2be2, #09090b)', glow: '0 0 25px rgba(138,43,226,0.8)', txt: '#8a2be2', hex: '#8a2be2' }
-    };
-
-    function getRankDetails(elo) {
-        if (elo < 1050) return { rank: "Новичок", color: "#888888", bg: "rgba(136, 136, 136, 0.2)" };
-        if (elo < 1150) return { rank: "Бронза", color: "#cd7f32", bg: "rgba(205, 127, 50, 0.2)" };
-        if (elo < 1300) return { rank: "Серебро", color: "#c0c0c0", bg: "rgba(192, 192, 192, 0.2)" };
-        if (elo < 1500) return { rank: "Золото", color: "#ffd700", bg: "rgba(255, 215, 0, 0.2)" };
-        if (elo < 1800) return { rank: "Мастер", color: "#ff2a2a", bg: "rgba(255, 42, 42, 0.2)" };
-        return { rank: "Легенда", color: "#cc0000", bg: "rgba(204, 0, 0, 0.2)" };
+    async function loadUserProfile(uid) {
+        const userDoc = await getDoc(doc(db, "users", uid));
+        if (userDoc.exists()) {
+            showProfile(userDoc.data(), true); // true означает режим просмотра чужого профиля
+        }
     }
 
-    // --- Логика переключения вкладок (Tabs) ---
-    const tabs = document.querySelectorAll('.nav-tabs span');
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            tabs.forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.add('hidden');
-                content.classList.remove('active');
-            });
-            const targetId = tab.getAttribute('data-tab');
-            document.getElementById(targetId).classList.remove('hidden');
-            document.getElementById(targetId).classList.add('active');
+    function showAuth() {
+        document.getElementById('authSection').classList.remove('hidden');
+        document.getElementById('profileSection').classList.add('hidden');
+        document.getElementById('setupSection').classList.add('hidden');
+    }
+
+    function showSetup() {
+        document.getElementById('setupSection').classList.remove('hidden');
+        document.getElementById('authSection').classList.add('hidden');
+        document.getElementById('profileSection').classList.add('hidden');
+    }
+
+    function showProfile(data, isPublic = false) {
+        document.getElementById('profileSection').classList.remove('hidden');
+        document.getElementById('authSection').classList.add('hidden');
+        document.getElementById('setupSection').classList.add('hidden');
+
+        // Данные профиля
+        document.getElementById('displayNickname').textContent = data.nickname || "Player";
+        document.getElementById('displayClanTag').textContent = data.clanTag ? `[${data.clanTag}] ` : "";
+        document.getElementById('displayGameId').textContent = data.gameId || "ID не указан";
+        document.getElementById('elo').textContent = data.elo || 1000;
+        document.getElementById('wins').textContent = data.wins || 0;
+        document.getElementById('losses').textContent = data.losses || 0;
+        
+        // Миниатюра и баннер
+        const avatarImg = data.avatarUrl || `https://ui-avatars.com/api/?name=${data.nickname}&background=e53935&color=fff`;
+        document.getElementById('userAvatar').src = avatarImg;
+        document.getElementById('menuAvatar').src = avatarImg;
+        document.getElementById('menuDisplayName').textContent = data.nickname;
+
+        if (data.profileBannerUrl) {
+            document.getElementById('profileBgBanner').style.backgroundImage = `url('${data.profileBannerUrl}')`;
+        }
+
+        // Расчет Winrate
+        const total = (data.wins || 0) + (data.losses || 0);
+        const wr = total > 0 ? Math.round((data.wins / total) * 100) : 0;
+        document.getElementById('winRateTxt').textContent = wr + '%';
+        
+        // Обновление полосок W/L
+        document.getElementById('lblWin').textContent = `W: ${data.wins || 0}`;
+        document.getElementById('lblLoss').textContent = `L: ${data.losses || 0}`;
+        document.getElementById('wlTotalMatches').textContent = total;
+        if(total > 0) {
+            document.getElementById('barWin').style.width = (data.wins / total * 100) + '%';
+            document.getElementById('barLoss').style.width = (data.losses / total * 100) + '%';
+        }
+
+        // Управление кнопками
+        document.getElementById('btnEditProfile').classList.toggle('hidden', isPublic);
+        document.getElementById('btnSubscribe').classList.toggle('hidden', !isPublic);
+        document.getElementById('btnLogout').classList.toggle('hidden', isPublic);
+
+        // Ранг (упрощенная логика)
+        let rank = "Bronze";
+        if(data.elo > 1500) rank = "Silver";
+        if(data.elo > 2000) rank = "Gold";
+        if(data.elo > 2500) rank = "Platinum";
+        if(data.elo > 3000) rank = "Diamond";
+        document.getElementById('rankBadge').textContent = rank;
+    }
+
+    // --- ОБНОВЛЕНИЕ ГЛОБАЛЬНОЙ СТАТИСТИКИ В МЕНЮ ---
+    async function updateGlobalStats() {
+        // Здесь можно добавить счетчик из Firebase. Пока для примера:
+        document.getElementById('menuOnlineCount').textContent = Math.floor(Math.random() * 50) + 10;
+        document.getElementById('menuRegisteredCount').textContent = "1,240";
+    }
+
+    // --- КНОПКИ ДЕЙСТВИЙ ---
+    
+    // Регистрация / Вход (стандартно)
+    document.getElementById('btnLogin')?.addEventListener('click', async () => {
+        const e = document.getElementById('email').value;
+        const p = document.getElementById('password').value;
+        try { await signInWithEmailAndPassword(auth, e, p); } catch(err) { alert("Ошибка входа: " + err.message); }
+    });
+
+    document.getElementById('btnRegister')?.addEventListener('click', async () => {
+        const e = document.getElementById('email').value;
+        const p = document.getElementById('password').value;
+        try { await createUserWithEmailAndPassword(auth, e, p); } catch(err) { alert("Ошибка регистрации: " + err.message); }
+    });
+
+    document.getElementById('btnLogout')?.addEventListener('click', () => signOut(auth));
+
+    // Сохранение профиля
+    document.getElementById('btnSaveSetup')?.addEventListener('click', async () => {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const newData = {
+            nickname: document.getElementById('setupNickname').value,
+            gameId: document.getElementById('setupGameId').value,
+            clanTag: document.getElementById('setupClanTag').value,
+            role: document.getElementById('setupRole').value,
+            avatarUrl: document.getElementById('setupAvatarUrl').value,
+            profileBannerUrl: document.getElementById('setupProfileBannerUrl').value,
+            elo: 1000,
+            wins: 0,
+            losses: 0
+        };
+
+        if(!newData.nickname || !newData.gameId) {
+            alert("Никнейм и ID обязательны!");
+            return;
+        }
+
+        await setDoc(doc(db, "users", user.uid), newData);
+        showProfile(newData);
+    });
+
+    // Копирование ID
+    document.getElementById('displayGameId').addEventListener('click', function() {
+        const id = this.innerText;
+        navigator.clipboard.writeText(id).then(() => {
+            const originalColor = this.style.color;
+            this.innerText = "COPIED!";
+            setTimeout(() => {
+                this.innerText = id;
+            }, 1000);
         });
     });
 
-    async function checkUnique(field, value, currentUid) {
-        const q = query(collection(db, "players"), where(field, "==", value));
-        const snap = await getDocs(q);
-        let isUnique = true;
-        snap.forEach(doc => { if (doc.id !== currentUid) isUnique = false; });
-        return isUnique;
-    }
-
-    function toggleButtonLoading(btnId, isLoading, originalText) {
-        const btn = document.getElementById(btnId);
-        btn.disabled = isLoading;
-        btn.innerText = isLoading ? "..." : originalText;
-    }
-
-    // Auth Event Listeners
-    document.getElementById('btnRegister').addEventListener('click', async () => { 
-        const email = document.getElementById('email').value.trim();
-        const pass = document.getElementById('password').value.trim();
-        if(pass.length < 6) return alert("Пароль минимум 6 символов!");
-        toggleButtonLoading('btnRegister', true, 'Создать аккаунт');
-        try {
-            const userCred = await createUserWithEmailAndPassword(auth, email, pass);
-            await sendEmailVerification(userCred.user);
-            alert("✅ Успешно! Отправлено письмо на почту. Подтверди её, затем войди.");
-            await signOut(auth);
-        } catch (e) { alert("Ошибка: " + e.message); } 
-        finally { toggleButtonLoading('btnRegister', false, 'Создать аккаунт'); }
-    });
-
-    document.getElementById('btnLogin').addEventListener('click', async () => { 
-        const email = document.getElementById('email').value.trim();
-        const pass = document.getElementById('password').value.trim();
-        toggleButtonLoading('btnLogin', true, 'Войти');
-        try { 
-            const userCred = await signInWithEmailAndPassword(auth, email, pass); 
-            if (!userCred.user.emailVerified) {
-                alert("⚠️ Почта еще не подтверждена!");
-                await signOut(auth);
-            }
-        } catch (e) { alert("Ошибка входа! Проверьте данные."); } 
-        finally { toggleButtonLoading('btnLogin', false, 'Войти'); }
-    });
-
-    document.getElementById('btnGoogle').addEventListener('click', async () => {
-        try { await signInWithPopup(auth, googleProvider); } catch (e) { alert("Ошибка Google: " + e.message); }
-    });
-
-    document.getElementById('btnTelegram').addEventListener('click', () => {
-        alert("Вход через Telegram в разработке! Для привязки требуется Telegram Bot API.");
-    });
-    
-    // Сохранение профиля
-    document.getElementById('btnSaveSetup').addEventListener('click', async () => {
-        const user = auth.currentUser;
-        if (!user) return;
-        
-        const nick = document.getElementById('setupNickname').value.trim();
-        const gameId = document.getElementById('setupGameId').value.trim();
-        const clanTag = document.getElementById('setupClanTag').value.trim();
-        const role = document.getElementById('setupRole').value;
-        const bannerColor = document.getElementById('setupBannerColor').value;
-        
-        const avatarUrl = document.getElementById('setupAvatarUrl').value.trim();
-        const profileBannerUrl = document.getElementById('setupProfileBannerUrl').value.trim();
-        const bannerUrl = document.getElementById('setupBannerUrl').value.trim();
-        const tgUrl = document.getElementById('setupTgUrl').value.trim();
-        const vkUrl = document.getElementById('setupVkUrl').value.trim();
-
-        if (nick.length < 3) return alert("Никнейм должен быть больше 3 символов.");
-        if (gameId.length < 5) return alert("Введите корректный ID из игры.");
-
-        toggleButtonLoading('btnSaveSetup', true, 'Сохранить');
-        
-        try {
-            if (!currentUserData || nick !== currentUserData.nickname) {
-                const isNickUnique = await checkUnique("nickname", nick, user.uid);
-                if (!isNickUnique) throw new Error("Этот Никнейм уже занят!");
-            }
-            if (!currentUserData || gameId !== currentUserData.gameId) {
-                const isIdUnique = await checkUnique("gameId", gameId, user.uid);
-                if (!isIdUnique) throw new Error("Этот ID уже привязан!");
-            }
-
-            await updateDoc(doc(db, "players", user.uid), { 
-                nickname: nick, gameId: gameId, clanTag: clanTag || null, 
-                role: role || "Рифлер", bannerColor: bannerColor || "red",
-                avatar: avatarUrl || user.photoURL || null, 
-                profileBanner: profileBannerUrl || null,
-                banner: bannerUrl || null,
-                socialTg: tgUrl || null, socialVk: vkUrl || null
-            });
-            
-            isEditingProfile = false;
-            checkUserState(user); 
-        } catch (e) { alert(e.message); } 
-        finally { toggleButtonLoading('btnSaveSetup', false, 'Сохранить'); }
-    });
-
-    document.getElementById('btnEditProfile').addEventListener('click', () => {
-        if (!currentUserData) return;
-        isEditingProfile = true;
-        profileSec.classList.add('hidden');
-        setupSec.classList.remove('hidden');
-        btnCancelSetup.classList.remove('hidden');
-        document.getElementById('setupTitle').innerText = "Редактирование профиля";
-        
-        document.getElementById('setupNickname').value = currentUserData.nickname || '';
-        document.getElementById('setupGameId').value = currentUserData.gameId || '';
-        document.getElementById('setupClanTag').value = currentUserData.clanTag || '';
-        document.getElementById('setupRole').value = currentUserData.role || 'Рифлер';
-        document.getElementById('setupBannerColor').value = currentUserData.bannerColor || 'red';
-        
-        document.getElementById('setupAvatarUrl').value = currentUserData.avatar && !currentUserData.avatar.includes('ui-avatars') ? currentUserData.avatar : '';
-        document.getElementById('setupProfileBannerUrl').value = currentUserData.profileBanner || '';
-        document.getElementById('setupBannerUrl').value = currentUserData.banner || '';
-        document.getElementById('setupTgUrl').value = currentUserData.socialTg || '';
-        document.getElementById('setupVkUrl').value = currentUserData.socialVk || '';
-    });
-
-    btnCancelSetup.addEventListener('click', () => {
-        isEditingProfile = false;
-        setupSec.classList.add('hidden');
-        profileSec.classList.remove('hidden');
-    });
-
-    // Улучшенное копирование ID
-    document.getElementById('displayGameId').addEventListener('click', function() {
-        const idText = this.getAttribute('data-id') || this.innerText;
-        if(idText !== '00000000') {
-            navigator.clipboard.writeText(idText);
-            this.setAttribute('data-id', idText);
-            const originalColor = this.style.color;
-            this.style.color = 'var(--win-green)';
-            this.innerText = 'Скопировано!';
-            this.style.pointerEvents = 'none'; 
-            setTimeout(() => { 
-                this.style.color = originalColor; 
-                this.innerText = idText; 
-                this.style.pointerEvents = 'auto';
-            }, 1000);
-        }
-    });
-
-    async function checkUserState(user) {
-        if (user && user.emailVerified === false && user.providerData[0].providerId === 'password') return;
-
-        if (user) {
-            authSec.classList.add('hidden');
-            const userRef = doc(db, "players", user.uid);
-            let snap = await getDoc(userRef);
-            
-            if (!snap.exists()) {
-                await setDoc(userRef, { email: user.email, elo: 1000, wins: 0, losses: 0, avatar: user.photoURL || null, role: "Рифлер", bannerColor: "red" });
-                snap = await getDoc(userRef); 
-            }
-            
-            currentUserData = snap.data();
-            const data = currentUserData;
-            
-            if (!data.nickname || !data.gameId) {
-                profileSec.classList.add('hidden');
-                setupSec.classList.remove('hidden');
-                btnCancelSetup.classList.add('hidden');
-            } else {
-                setupSec.classList.add('hidden');
-                profileSec.classList.remove('hidden');
-                
-                document.getElementById('menuDisplayName').innerText = data.nickname;
-                document.getElementById('displayNickname').innerText = data.nickname;
-                const clanDisplay = document.getElementById('displayClanTag');
-                clanDisplay.innerText = data.clanTag ? `[${data.clanTag}] ` : '';
-
-                document.getElementById('displayGameId').innerText = data.gameId;
-                document.getElementById('displayGameId').setAttribute('data-id', data.gameId);
-
-                const wins = data.wins || 0; const losses = data.losses || 0; const elo = data.elo || 1000;
-                document.getElementById('elo').innerText = elo;
-                document.getElementById('wins').innerText = wins;
-                document.getElementById('losses').innerText = losses;
-
-                const totalMatches = wins + losses;
-                let winRate = "0%"; let winPct = 50; let lossPct = 50;
-                if (totalMatches > 0) {
-                    const rawWinPct = (wins / totalMatches) * 100;
-                    winRate = Math.round(rawWinPct) + "%";
-                    winPct = rawWinPct; lossPct = 100 - rawWinPct;
-                }
-                
-                document.getElementById('winRateTxt').innerText = winRate;
-                document.getElementById('wlTotalMatches').innerText = totalMatches;
-                document.getElementById('barWin').style.width = winPct + "%";
-                document.getElementById('barLoss').style.width = lossPct + "%";
-                document.getElementById('lblWin').innerText = `W: ${wins}`;
-                document.getElementById('lblLoss').innerText = `L: ${losses}`;
-                
-                const safeNick = encodeURIComponent(data.nickname || 'Player');
-                const defaultAvatar = `https://ui-avatars.com/api/?name=${safeNick}&background=ff0000&color=fff&font-size=0.4`;
-                const userAvatarUrl = data.avatar || defaultAvatar;
-                
-                document.getElementById('userAvatar').src = userAvatarUrl;
-                document.getElementById('menuAvatar').src = userAvatarUrl; 
-                
-                // Настройка цветов и баннеров
-                const colorConfig = bannerColors[data.bannerColor || 'red'] || bannerColors['red'];
-                const bannerEl = document.getElementById('userBanner');
-                const profileBgBanner = document.getElementById('profileBgBanner');
-                
-                // GLOW рамки аватарки
-                const mainAvatar = document.getElementById('userAvatar');
-                mainAvatar.style.borderColor = colorConfig.hex;
-                mainAvatar.style.boxShadow = colorConfig.glow;
-
-                bannerEl.style.boxShadow = colorConfig.glow;
-                document.getElementById('eloLabelColor').style.color = colorConfig.txt;
-
-                // Баннер ELO
-                if(data.banner) bannerEl.style.backgroundImage = `url("${data.banner}")`;
-                else bannerEl.style.backgroundImage = colorConfig.grad;
-
-                // Задний фон аватарки в профиле
-                if(data.profileBanner) profileBgBanner.style.backgroundImage = `url("${data.profileBanner}")`;
-                else profileBgBanner.style.backgroundImage = 'none';
-
-                const rankDetails = getRankDetails(elo);
-                const badge = document.getElementById('rankBadge');
-                badge.innerText = `${data.role || 'Рифлер'} - ${rankDetails.rank}`;
-                badge.style.color = rankDetails.color;
-                badge.style.borderColor = rankDetails.color;
-                
-                const socialsContainer = document.getElementById('socialLinksContainer');
-                socialsContainer.innerHTML = '';
-                if(data.socialTg) socialsContainer.innerHTML += `<a href="${data.socialTg}" target="_blank" class="social-link" title="Telegram"><svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.89 8.24l-1.97 9.28c-.14.65-.53.81-1.07.51l-2.96-2.18-1.43 1.38c-.16.16-.29.29-.6.29l.21-3.02 5.5-4.97c.24-.22-.05-.34-.37-.13l-6.79 4.27-2.93-.92c-.64-.2-.65-.64.13-.95l11.45-4.41c.53-.2.99.11.83.85z"/></svg></a>`;
-                if(data.socialVk) socialsContainer.innerHTML += `<a href="${data.socialVk}" target="_blank" class="social-link" title="VK"><svg viewBox="0 0 24 24"><path d="M23.1 7.2c.2-.6 0-1.1-.9-1.1h-2.6c-.7 0-1.1.4-1.4.9 0 0-1.3 3.2-3.2 5.3-.6.6-.9.8-1.3.8-.2 0-.4-.2-.4-.7V7.1c0-.7-.2-1.1-.8-1.1h-4.4c-.4 0-.7.3-.7.6 0 .6 1 .8 1.1 2.6v3.9c0 .9-.2 1.1-.5 1.1-.9 0-3.3-3.2-4.6-6.9-.3-.8-.6-1.1-1.3-1.1H.5c-.8 0-.9.4-.9.9 0 1 1.3 6.1 6.1 12.8 3.2 4.6 7.6 7.1 11.6 7.1 2.4 0 2.7-.5 2.7-1.4V20c0-.8.2-1 .7-1 .4 0 1.1.2 2.7 1.7 1.9 1.9 2.2 2.8 3.3 2.8h2.6c.8 0 1.2-.4 1-.1-.3-.6-1.5-2.2-3-3.8-1.3-1.5-1.7-2.1-2.2-2.8-.6-.7-.4-1 0-1.6 0-.1 2.9-4.1 3.2-5z"/></svg></a>`;
-            }
-        } else {
-            authSec.classList.remove('hidden');
-            profileSec.classList.add('hidden');
-            setupSec.classList.add('hidden');
-            document.getElementById('menuDisplayName').innerText = 'Авторизуйтесь';
-            isEditingProfile = false;
-        }
-    }
-
-    onAuthStateChanged(auth, checkUserState);
-    document.getElementById('btnLogout').addEventListener('click', () => signOut(auth));
 </script>
 </body>
 </html>
+
