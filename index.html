@@ -10,7 +10,7 @@
             --red: #ff2a2a;            
             --dark-red: #8b0000;       
             --bg-base: #030303;        
-            --border: rgba(255, 42, 42, 0.15); /* Тонкий красный акцент */
+            --border: rgba(255, 42, 42, 0.15);
             --text-main: #f0f0f0;
             --text-muted: #888888;
             --win-green: #22c55e;
@@ -62,15 +62,16 @@
         
         .auth-setup-wrapper { max-width: 420px; margin: 40px auto; width: 100%; }
         
+        /* Исправленная шапка: логотип по центру и крупнее */
         .top-header { 
-            display: flex; justify-content: space-between; align-items: center; 
-            width: 100%; margin-bottom: 30px; position: relative; z-index: 10; 
+            display: flex; justify-content: center; align-items: center; 
+            width: 110%; margin-bottom: 30px; position: relative; z-index: 10; 
         }
 
         .header-logo {
-            height: 40px;
+            height: 100px; /* Сделано крупнее */
             object-fit: contain;
-            filter: drop-shadow(0 0 8px rgba(255, 42, 42, 0.3));
+            filter: drop-shadow(0 0 12px rgba(255, 42, 42, 0.4));
         }
 
         h2 { 
@@ -85,7 +86,8 @@
         /* ================= МЕНЮ ================= */
         .bento-menu { 
             display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; 
-            width: 28px; height: 28px; cursor: pointer; transition: 0.3s; padding: 2px; 
+            width: 28px; height: 28px; cursor: pointer; transition: 0.3s; padding: 2px;
+            position: absolute; left: 0; /* Фиксация слева */
         }
         .bento-menu span { background: var(--text-main); border-radius: 2px; width: 6px; height: 6px; transition: 0.3s; }
         .bento-menu:hover span { background: var(--red); box-shadow: 0 0 8px var(--red); }
@@ -110,10 +112,20 @@
         }
         .side-menu.open { left: 0; }
         
+        /* Исправленный фон меню с поддержкой баннера */
         .menu-profile-header { 
             padding: 30px 20px; border-bottom: 1px solid var(--border); 
-            display: flex; align-items: center; gap: 15px; background: rgba(255,42,42,0.03); 
+            display: flex; align-items: center; gap: 15px; 
+            background-color: rgba(255,42,42,0.03); 
+            background-size: cover; background-position: center;
+            position: relative;
         }
+        .menu-profile-header::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10,10,12,0.7); z-index: 0; pointer-events: none;
+        }
+        .menu-profile-header > * { position: relative; z-index: 1; }
+        
         .menu-profile-header img { 
             width: 50px; height: 50px; border-radius: 50%; 
             border: 1px solid var(--red); box-shadow: 0 0 10px rgba(255,42,42,0.3); object-fit: cover; 
@@ -124,14 +136,37 @@
         }
         .menu-profile-header .name:hover { color: var(--red); text-shadow: 0 0 8px rgba(255,42,42,0.5); }
 
-        .menu-nav { display: flex; flex-direction: column; padding: 20px 0; flex-grow: 1; gap: 2px; }
+        /* Поисковик - поднят наверх */
+        .search-container { position: relative; width: 100%; padding: 15px 20px 5px 20px; }
+        .menu-search { 
+            width: 100%; padding: 10px 15px; border-radius: 6px; 
+            border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.5); 
+            color: white; outline: none; font-family: 'Inter', sans-serif; font-size: 0.85rem; transition: 0.3s; 
+        }
+        .menu-search:focus { border-color: var(--red); box-shadow: 0 0 8px rgba(255, 42, 42, 0.2); }
+        .search-results {
+            position: absolute; top: 100%; left: 20px; right: 20px; background: rgba(15,15,18,0.98);
+            border: 1px solid var(--border); border-radius: 6px; margin-top: 5px;
+            max-height: 200px; overflow-y: auto; z-index: 100; display: none; backdrop-filter: blur(10px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+        .search-item { padding: 12px 15px; font-size: 0.85rem; color: white; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .search-item:hover { background: rgba(255,42,42,0.1); color: var(--red); }
+
+        /* Исправленные стеклянные разделы меню */
+        .menu-nav { display: flex; flex-direction: column; padding: 15px 0; flex-grow: 1; gap: 8px; }
         .menu-nav a { 
-            display: flex; align-items: center; gap: 15px; padding: 12px 25px; 
+            display: flex; align-items: center; gap: 15px; padding: 12px 20px; margin: 0 15px;
             color: var(--text-main); text-decoration: none; font-size: 0.9rem; font-weight: 500; 
-            transition: 0.3s; border-left: 2px solid transparent; 
+            transition: 0.3s; 
+            background: rgba(255, 255, 255, 0.04); /* Стеклянный фон */
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
         }
         .menu-nav a:hover { 
-            background: rgba(255,42,42,0.08); border-left-color: var(--red); color: white; 
+            background: rgba(255,42,42,0.15); border-color: var(--red); color: white; 
+            box-shadow: 0 4px 15px rgba(255, 42, 42, 0.2);
         }
         
         .menu-nav a svg:not(.dev-icon) { 
@@ -144,30 +179,13 @@
 
         .menu-footer { padding: 20px; border-top: 1px solid var(--border); background: rgba(5,5,5,0.8); }
         
-        .stats-footer { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
+        .stats-footer { display: flex; flex-direction: column; gap: 8px; }
         .stats-row { display: flex; align-items: center; font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
         .stats-row svg { margin-right: 10px; width: 14px; height: 14px; fill: var(--red); }
         .stats-val { color: white; margin-left: auto; font-family: 'Orbitron', sans-serif; font-weight: 700; }
         
         .blink-dot { width: 8px; height: 8px; background: var(--red); border-radius: 50%; margin-right: 10px; box-shadow: 0 0 8px var(--red); animation: pulse 2s infinite; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
-        
-        /* Поисковик */
-        .search-container { position: relative; width: 100%; }
-        .menu-search { 
-            width: 100%; padding: 10px 15px; border-radius: 6px; 
-            border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.5); 
-            color: white; outline: none; font-family: 'Inter', sans-serif; font-size: 0.85rem; transition: 0.3s; 
-        }
-        .menu-search:focus { border-color: var(--red); box-shadow: 0 0 8px rgba(255, 42, 42, 0.2); }
-        .search-results {
-            position: absolute; bottom: 110%; left: 0; right: 0; background: rgba(15,15,18,0.98);
-            border: 1px solid var(--border); border-radius: 6px;
-            max-height: 200px; overflow-y: auto; z-index: 100; display: none; backdrop-filter: blur(10px);
-            box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
-        }
-        .search-item { padding: 12px 15px; font-size: 0.85rem; color: white; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .search-item:hover { background: rgba(255,42,42,0.1); color: var(--red); }
 
         /* ================= ПАНЕЛИ ================= */
         .panel {
@@ -232,13 +250,13 @@
             position: relative; z-index: 2; 
             border-radius: 50%;
             background: linear-gradient(135deg, var(--red) 0%, transparent 100%);
-            padding: 2px; /* Тонкая светящаяся рамка */
+            padding: 2px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
         .avatar-img { 
             width: 100%; height: 100%; border-radius: 50%; object-fit: cover; 
             background: var(--bg-base);
-            border: 3px solid var(--bg-base); /* Отступ от градиента */
+            border: 3px solid var(--bg-base);
         }
 
         .nickname-display { 
@@ -315,22 +333,6 @@
         .score.loss { color: var(--loss-red); }
         .mh-map { display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-weight: 600; justify-content: flex-end;}
         
-        /* Исправленная статистика (Новая) */
-        .stats-advanced { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
-        .chart-panel { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; padding: 25px; display: flex; flex-direction: column; justify-content: center; }
-        .chart-title { font-weight: 700; text-transform: uppercase; margin-bottom: 25px; color: var(--text-muted); text-align: center; font-size: 0.85rem;}
-        
-        .stat-line { margin-bottom: 18px; }
-        .stat-line-header { display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; margin-bottom: 6px; font-family: 'Orbitron', sans-serif; }
-        .stat-line-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; }
-        .stat-line-fill { height: 100%; background: var(--red); box-shadow: 0 0 8px var(--red); border-radius: 3px; transition: 1s ease-out; }
-
-        .wl-bar-wrap { width: 100%; margin-top: 10px; }
-        .wl-bar { width: 100%; height: 12px; background: rgba(255,255,255,0.05); border-radius: 6px; overflow: hidden; display: flex; }
-        .wl-win-fill { background: var(--win-green); height: 100%; transition: width 0.5s; box-shadow: 0 0 8px var(--win-green); }
-        .wl-loss-fill { background: var(--loss-red); height: 100%; transition: width 0.5s; box-shadow: 0 0 8px var(--loss-red); }
-        .wl-labels { display: flex; justify-content: space-between; margin-top: 8px; font-weight: 700; font-family: 'Orbitron', sans-serif; font-size: 0.85rem; }
-        
         .hidden { display: none !important; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -343,7 +345,6 @@
         }
         @media (max-width: 600px) {
             .stats-grid { grid-template-columns: 1fr 1fr; }
-            .stats-advanced { grid-template-columns: 1fr; }
             .mh-item { grid-template-columns: 70px 30px 60px 1fr; }
             .mh-kda { display: none; } 
             .nav-tabs { padding-bottom: 8px; font-size: 0.75rem; }
@@ -361,12 +362,18 @@
 
 <div class="side-menu-overlay" id="menuOverlay"></div>
 <aside class="side-menu" id="sideMenu">
-    <div class="menu-profile-header">
+    <div class="menu-profile-header" id="menuProfileBg">
         <img src="https://ui-avatars.com/api/?name=P&background=ff2a2a&color=fff" id="menuAvatar" alt="Аватар">
         <div>
             <span class="name" id="menuDisplayName" title="Перейти в профиль">Авторизуйтесь</span>
         </div>
     </div>
+    
+    <div class="search-container">
+        <input type="text" class="menu-search" id="menuSearchInput" placeholder="Поиск пользователя...">
+        <div class="search-results" id="searchResults"></div>
+    </div>
+
     <nav class="menu-nav">
         <a href="#" class="dev-link"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg> Главная 
             <svg class="dev-icon" title="Разработка раздела" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.77 3.77z"></path></svg>
@@ -382,6 +389,27 @@
         </a>
         <a href="#" class="dev-link"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg> Создать команду 
             <svg class="dev-icon" title="Разработка раздела" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.77 3.77z"></path></svg>
+
+
+    <a href="/ratings" class="menu-item-link">
+        <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        Рейтинги
+                    <svg class="dev-icon" title="Разработка раздела" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.77 3.77z"></path></svg>
+    </a>
+
+    <a href="/about" class="menu-item-link">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+        О нас
+                    <svg class="dev-icon" title="Разработка раздела" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.77 3.77z"></path></svg>
+    </a>
+
+    <a href="/support" class="menu-item-link">
+        <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 11H7V9h2v2zm4 0h-2V9h2v2zm4 0h-2V9h2v2z"/></svg>
+        Тех.поддержка
+                    <svg class="dev-icon" title="Разработка раздела" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.77 3.77z"></path></svg>
+    </a>
+</nav>
+
         </a>
     </nav>
     <div class="menu-footer">
@@ -395,10 +423,6 @@
                 Игроков: <span class="stats-val" id="menuRegisteredCount">--</span>
             </div>
         </div>
-        <div class="search-container">
-            <input type="text" class="menu-search" id="menuSearchInput" placeholder="Поиск пользователя...">
-            <div class="search-results" id="searchResults"></div>
-        </div>
     </div>
 </aside>
 
@@ -410,7 +434,7 @@
             <span></span><span></span><span></span>
             <span></span><span></span><span></span>
         </div>
-        <img src="https://i.postimg.cc/br0Pyxgm/Airbrush-IMAGE-ENHANCER-1772649821056-1772649821057.png" alt="Project Faceit" class="header-logo">
+        <img src="https://i.postimg.cc/vHnb0wwv/1772819349819.png" alt="Project Faceit" class="header-logo">
         <div style="width: 28px;"></div> 
     </header>
 
@@ -514,8 +538,7 @@
             <nav class="nav-tabs">
                 <span class="active" data-tab="tab-summary">Общая Информация</span>
                 <span data-tab="tab-history">История матчей</span>
-                <span data-tab="tab-stats">Статистика</span>
-            </nav>
+                </nav>
 
             <div class="hero-banner" id="userBanner">
                 <div class="hero-elo-box">
@@ -594,60 +617,7 @@
                     </div>
                 </div>
             </div>
-
-            <div id="tab-stats" class="tab-content hidden">
-                <div class="stats-advanced">
-                    
-                    <div class="chart-panel">
-                        <div class="chart-title">Detailed Stats (Standoff 2)</div>
-                        
-                        <div class="stat-line">
-                            <div class="stat-line-header">
-                                <span style="color: #aaa;">ADR (Урон за раунд)</span>
-                                <span style="color: white; font-weight: 700;">145.2</span>
-                            </div>
-                            <div class="stat-line-bg"><div class="stat-line-fill" style="width: 70%;"></div></div>
-                        </div>
-
-                        <div class="stat-line">
-                            <div class="stat-line-header">
-                                <span style="color: #aaa;">K/R Ratio (Убийств за раунд)</span>
-                                <span style="color: white; font-weight: 700;">0.92</span>
-                            </div>
-                            <div class="stat-line-bg"><div class="stat-line-fill" style="width: 65%;"></div></div>
-                        </div>
-
-                        <div class="stat-line">
-                            <div class="stat-line-header">
-                                <span style="color: #aaa;">Выживаемость</span>
-                                <span style="color: white; font-weight: 700;">38%</span>
-                            </div>
-                            <div class="stat-line-bg"><div class="stat-line-fill" style="width: 38%;"></div></div>
-                        </div>
-                    </div>
-
-                    <div class="chart-panel" style="text-align: center;">
-                        <div class="chart-title">Win / Loss Ratio</div>
-                        
-                        <div style="font-size: 2.5rem; font-family: 'Orbitron', sans-serif; font-weight: 900; line-height: 1;" id="wlTotalMatches">0</div>
-                        <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; margin-bottom: 25px; margin-top: 5px;">Total Matches</div>
-
-                        <div class="wl-bar-wrap">
-                            <div class="wl-bar">
-                                <div class="wl-win-fill" id="barWin" style="width: 50%;"></div>
-                                <div class="wl-loss-fill" id="barLoss" style="width: 50%;"></div>
-                            </div>
-                            <div class="wl-labels">
-                                <span style="color: var(--win-green);" id="lblWin">W: 0</span>
-                                <span style="color: var(--loss-red);" id="lblLoss">L: 0</span>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
-        </main>
+            </main>
     </div>
 </div>
 
@@ -1034,20 +1004,18 @@
                 document.getElementById('wins').innerText = wins;
                 document.getElementById('losses').innerText = losses;
 
-                const totalMatches = wins + losses;
-                let winRate = "0%"; let winPct = 50; let lossPct = 50;
-                if (totalMatches > 0) {
-                    const rawWinPct = (wins / totalMatches) * 100;
-                    winRate = Math.round(rawWinPct) + "%";
-                    winPct = rawWinPct; lossPct = 100 - rawWinPct;
-                }
+                // Для совместимости с удаленной статистикой, я убрал обновление элементов winRate, wlTotalMatches и barWin, так как они были удалены из HTML
+                // (или можно оставить, но чтобы не было ошибок, лучше обернуть в try/catch, если они вдруг пропали)
                 
-                document.getElementById('winRateTxt').innerText = winRate;
-                document.getElementById('wlTotalMatches').innerText = totalMatches;
-                document.getElementById('barWin').style.width = winPct + "%";
-                document.getElementById('barLoss').style.width = lossPct + "%";
-                document.getElementById('lblWin').innerText = `W: ${wins}`;
-                document.getElementById('lblLoss').innerText = `L: ${losses}`;
+                try {
+                    const totalMatches = wins + losses;
+                    let winRate = "0%";
+                    if (totalMatches > 0) {
+                        const rawWinPct = (wins / totalMatches) * 100;
+                        winRate = Math.round(rawWinPct) + "%";
+                    }
+                    document.getElementById('winRateTxt').innerText = winRate;
+                } catch(e) {}
                 
                 const safeNick = encodeURIComponent(data.nickname || 'Player');
                 const defaultAvatar = `https://ui-avatars.com/api/?name=${safeNick}&background=ff2a2a&color=fff&font-size=0.4`;
@@ -1059,9 +1027,8 @@
                 const colorConfig = bannerColors[data.bannerColor || 'red'] || bannerColors['red'];
                 const bannerEl = document.getElementById('userBanner');
                 const profileBgBanner = document.getElementById('profileBgBanner');
+                const menuProfileBg = document.getElementById('menuProfileBg');
                 
-                // Свечение аватарки интегрировано через background в CSS первой части,
-                // поэтому тут просто задаем рамку и обводку, если нужно.
                 const mainAvatarWrap = document.querySelector('.avatar-wrap');
                 if(mainAvatarWrap) {
                     mainAvatarWrap.style.boxShadow = colorConfig.glow;
@@ -1073,8 +1040,14 @@
                 if(data.banner) bannerEl.style.backgroundImage = `url("${data.banner}")`;
                 else bannerEl.style.backgroundImage = colorConfig.grad;
 
-                if(data.profileBanner) profileBgBanner.style.backgroundImage = `url("${data.profileBanner}")`;
-                else profileBgBanner.style.backgroundImage = 'none';
+                // Устанавливаем фон для баннера профиля и для шапки гамбургер-меню
+                if(data.profileBanner) {
+                    profileBgBanner.style.backgroundImage = `url("${data.profileBanner}")`;
+                    menuProfileBg.style.backgroundImage = `url("${data.profileBanner}")`;
+                } else {
+                    profileBgBanner.style.backgroundImage = 'none';
+                    menuProfileBg.style.backgroundImage = 'none';
+                }
 
                 const rankDetails = getRankDetails(elo);
                 const badge = document.getElementById('rankBadge');
@@ -1101,4 +1074,3 @@
 </script>
 </body>
 </html>
-
