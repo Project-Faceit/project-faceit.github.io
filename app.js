@@ -462,6 +462,21 @@ async function checkUserState(user) {
         showSection(authSec, "Вход");
     }
 }
+// Логика показа списка подписок при клике на эмблему
+const subTrigger = document.getElementById('subTrigger');
+const subList = document.getElementById('subscriptionList');
+
+if (subTrigger && subList) {
+    subTrigger.addEventListener('click', () => {
+        // Переключаем класс hidden (показать/скрыть)
+        subList.classList.toggle('hidden');
+        
+        // Плавная прокрутка к списку при открытии
+        if (!subList.classList.contains('hidden')) {
+            subList.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+}
 
 onAuthStateChanged(auth, checkUserState);
 document.getElementById('btnLogout').addEventListener('click', () => signOut(auth));
