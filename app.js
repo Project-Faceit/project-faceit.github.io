@@ -143,11 +143,17 @@ setInterval(updateOnlineStats, 30000);
 // ЛОГИКА ПРОФИЛЯ И КНОПОК
 // ==========================================
 
+// Логика кнопки "Поделиться"
 const shareBtn = document.getElementById('btnShareProfile');
 shareBtn.addEventListener('click', () => {
-    const profileUrl = window.location.href;
-    navigator.clipboard.writeText(profileUrl).then(() => {
-        alert("Ссылка на профиль скопирована!");
+    if(!currentUserData || !currentUserData.gameId) return;
+    
+    // Создаем URL с параметром gameId
+    const url = new URL(window.location.origin + window.location.pathname);
+    url.searchParams.set('user', currentUserData.gameId);
+    
+    navigator.clipboard.writeText(url.toString()).then(() => {
+        alert(`Ссылка на ваш профиль скопирована!\n${url.toString()}`);
     }).catch(err => console.error('Ошибка копирования:', err));
 });
 
@@ -442,6 +448,46 @@ async function checkUserState(user) {
         document.title = "Project Faceit | Вход"; // Меняем Title для авторизации
     }
 }
+// Функция для загрузки профиля по ID из URL
+async function loadProfileByUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetGameId = urlParams.get('user');
+
+    if (targetGameId) {
+        try {
+            const q = query(collection(db, "players"), where("gameId", "==", targetGameId));
+            const querySnapshot = await getDocs(q);
+            
+            if (!querySnapshot.empty) {
+                const docData = querySnapshot.docs[0].data();
+                // Показываем данные этого игрока (режим просмотра)
+                displayPlayerData(docData); 
+                showSection(profileSec, docData.nickname);
+                
+                // Скрываем кнопки редактирования, т.к. это чужой профиль
+                document.getElementById('btnEditProfile').classList.add('hidden');
+                document.getElementById('btnLogout').classList.add('hidden');
+            } else {
+                console.log("Пользователь не найден.");
+            }
+        } catch (e) {
+            console.error("Ошибка при поиске пользователя:", e);
+        }
+    }
+}
+
+// Вспомогательная функция для отрисовки (вынеси её из checkUserState)
+function displayPlayerData(data) {
+    document.getElementById('displayNickname').innerText = data.nickname;
+    document.getElementById('displayGameId').innerText = data.gameId;
+    document.getElementById('elo').innerText = data.elo || 1000;
+    document.getElementById('wins').innerText = data.wins || 0;
+    document.getElementById('losses').innerText = data.losses || 0;
+    // ... здесь добавь остальное заполнение полей (аватар, баннер и т.д.)
+}
+
+// Запускать при загрузке страницы
+loadProfileByUrl();
 
 onAuthStateChanged(auth, checkUserState);
 document.getElementById('btnLogout').addEventListener('click', () => signOut(auth));
