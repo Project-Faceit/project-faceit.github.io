@@ -462,18 +462,18 @@ async function checkUserState(user) {
         showSection(authSec, "Вход");
     }
 }
-// Логика показа списка подписок при клике на эмблему
-const subTrigger = document.getElementById('subTrigger');
-const subList = document.getElementById('subscriptionList');
+// Код для переключения видимости подписок
+const trigger = document.getElementById('subTrigger');
+const subContainer = document.getElementById('subscriptionContainer');
 
-if (subTrigger && subList) {
-    subTrigger.addEventListener('click', () => {
+if (trigger && subContainer) {
+    trigger.addEventListener('click', () => {
         // Переключаем класс hidden (показать/скрыть)
-        subList.classList.toggle('hidden');
+        subContainer.classList.toggle('hidden');
         
-        // Плавная прокрутка к списку при открытии
-        if (!subList.classList.contains('hidden')) {
-            subList.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Если блок показался, плавно прокручиваем к нему
+        if (!subContainer.classList.contains('hidden')) {
+            subContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     });
 }
