@@ -111,28 +111,35 @@ const searchInput = document.getElementById('menuSearchInput');
 const searchResults = document.getElementById('searchResults');
 
 searchInput.addEventListener('input', async (e) => {
-    const val = e.target.value.trim().toLowerCase();
+    // Делаем первую букву заглавной, если у тебя ники так хранятся (или приводим к нужному регистру)
+    const val = e.target.value.trim(); 
     if (val.length < 2) {
         searchResults.style.display = 'none';
         return;
     }
     
     try {
+        // ИЩЕМ НА СЕРВЕРЕ, А НЕ СКАЧИВАЕМ ВСЮ БАЗУ!
+        // Ищет совпадения, начиная с введенных букв (например, "Na" найдет "Navi")
         const coll = collection(db, "players");
-        const snap = await getDocs(coll);
+        const q = query(
+            coll, 
+            where("nickname", ">=", val), 
+            where("nickname", "<=", val + '\uf8ff')
+        );
+        
+        const snap = await getDocs(q);
         searchResults.innerHTML = '';
         let found = 0;
 
         snap.forEach(docSnap => {
             const data = docSnap.data();
-            if (data.nickname && data.nickname.toLowerCase().includes(val)) {
-                found++;
-                const div = document.createElement('div');
-                div.className = 'search-item';
-                div.innerText = data.clanTag ? `[${data.clanTag}] ${data.nickname}` : data.nickname;
-                div.onclick = () => alert(`Переход в профиль: ${data.nickname} (В разработке)`);
-                searchResults.appendChild(div);
-            }
+            found++;
+            const div = document.createElement('div');
+            div.className = 'search-item';
+            div.innerText = data.clanTag ? `[${data.clanTag}] ${data.nickname}` : data.nickname;
+            div.onclick = () => alert(`Переход в профиль: ${data.nickname} (В разработке)`);
+            searchResults.appendChild(div);
         });
 
         if (found === 0) {
@@ -144,25 +151,6 @@ searchInput.addEventListener('input', async (e) => {
     }
 });
 
-document.addEventListener('click', (e) => {
-    if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
-        searchResults.style.display = 'none';
-    }
-});
-
-async function updateOnlineStats() {
-    try {
-        const coll = collection(db, "players");
-        const snapshot = await getCountFromServer(coll);
-        const totalUsers = snapshot.data().count;
-        
-        document.getElementById('menuRegisteredCount').innerText = totalUsers;
-        const simulatedOnline = Math.max(1, Math.floor(totalUsers * 0.25) + Math.floor(Math.random() * 5));
-        document.getElementById('menuOnlineCount').innerText = simulatedOnline;
-    } catch(e) { 
-        console.error("Ошибка статистики:", e); 
-    }
-}
 updateOnlineStats();
 setInterval(updateOnlineStats, 30000);
 
