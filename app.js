@@ -18,12 +18,15 @@ const googleProvider = new GoogleAuthProvider();
 
 async function fetchUserCountry() {
     try {
-        const res = await fetch('https://ipapi.co/json/');
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000); // Тайм-аут 3 секунды, чтобы сайт не вис
+        const res = await fetch('https://ipapi.co/json/', { signal: controller.signal });
+        clearTimeout(timeoutId);
         const data = await res.json();
         return data.country_name || "Неизвестно";
     } catch (e) {
         console.error("Ошибка при определении страны:", e);
-        return "Неизвестно";
+        return "Неизвестно"; // Мгновенный фоллбэк
     }
 }
 
@@ -100,6 +103,7 @@ if (menuDisplayNameEl) {
         if(currentUserData && currentUserData.nickname) {
             // Возвращаемся в свой профиль
             window.history.pushState(null, null, window.location.pathname);
+            showSection(profileSec, currentUserData.nickname); // ИСПРАВЛЕНИЕ: Явный вызов профиля
             checkUserState(auth.currentUser);
         }
     });
@@ -177,12 +181,13 @@ if (searchInput && searchResults) {
 
 async function updateOnlineStats() {
     try {
-        const statsElement = document.getElementById('onlineStats');
+        // ИСПРАВЛЕНИЕ: Был неверный ID, заменен на правильный ID из HTML (menuTotalUsers)
+        const statsElement = document.getElementById('menuTotalUsers');
         if (!statsElement) return;
 
         const coll = collection(db, "players");
         const snapshot = await getCountFromServer(coll);
-        statsElement.innerText = `Игроков в базе: ${snapshot.data().count}`;
+        statsElement.innerText = snapshot.data().count; // ИСПРАВЛЕНИЕ: Оставляем только число, так как в HTML текст уже есть
     } catch (e) {
         console.error("Ошибка при получении статистики:", e);
     }
@@ -304,7 +309,7 @@ function toggleButtonLoading(btnId, isLoading, originalText) {
     }
 }
 
-// Регистрация и логин (без изменений)
+// Регистрация и логин
 const btnRegister = document.getElementById('btnRegister');
 if (btnRegister) {
     btnRegister.addEventListener('click', async () => { 
@@ -316,7 +321,7 @@ if (btnRegister) {
             const userCred = await createUserWithEmailAndPassword(auth, email, pass);
             await sendEmailVerification(userCred.user);
             alert("✅ Успешно! Отправлено письмо на почту. Подтверди её, затем войди.");
-            await signOut(auth);
+            // onAuthStateChanged сам тихо сделает signOut, чтобы не конфликтовать
         } catch (e) { alert("Ошибка: " + e.message); } 
         finally { toggleButtonLoading('btnRegister', false, 'Создать аккаунт'); }
     });
@@ -425,8 +430,8 @@ if (btnCancelSetup) {
 // ГЛАВНЫЙ РОУТЕР И РЕНДЕР: ЧТЕНИЕ URL
 // ==========================================
 async function checkUserState(user) {
+    // Убрал отсюда alert, чтобы избежать бага при регистрации нового пользователя.
     if (user && user.emailVerified === false && user.providerData?.[0]?.providerId === 'password') {
-        alert("Пожалуйста, подтвердите email перед входом.");
         signOut(auth);
         showSection(authSec, "Вход");
         return;
@@ -510,12 +515,18 @@ async function checkUserState(user) {
 
     // Если данные получены - рисуем страницу профиля/главную
     if (dataToDisplay) {
-        // Логика перехода: если мы пришли с логина или впервые - на главную, иначе в профиль по ссылке
         if (!isEditingProfile) {
             if (targetGameId) {
-                showSection(profileSec, dataToDisplay.nickname); // Если есть ?user=... - форсированно в профиль
-            } else if ((authSec && !authSec.classList.contains('hidden')) || (setupSec && !setupSec.classList.contains('hidden'))) {
-                showSection(mainSec, "Главная");
+                showSection(profileSec, dataToDisplay.nickname);
+            } else if (setupSec && !setupSec.classList.contains('hidden')) {
+                // Если мы только что закончили настройку профиля - идем в ПРОФИЛЬ (исправлено)
+                showSection(profileSec, dataToDisplay.nickname);
+            } else if (authSec && !authSec.classList.contains('hidden')) {
+                // ИСПРАВЛЕНИЕ: Открываем профиль сразу после входа
+                showSection(profileSec, dataToDisplay.nickname);
+            } else if (profileSec.classList.contains('hidden') && mainSec.classList.contains('hidden')) {
+                // ИСПРАВЛЕНИЕ: Если страница была обновлена, и все секции были спрятаны, мы открываем профиль
+                showSection(profileSec, dataToDisplay.nickname);
             }
         }
 
