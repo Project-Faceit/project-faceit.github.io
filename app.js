@@ -174,7 +174,6 @@ const shareBtn = document.getElementById('btnShareProfile');
 shareBtn.addEventListener('click', () => {
     if(!currentUserData || !currentUserData.gameId) return;
     
-    // Генерируем ссылку с параметром пользователя. Например: /?user=123456
     const url = new URL(window.location.origin + window.location.pathname);
     url.searchParams.set('user', currentUserData.gameId);
     
@@ -255,8 +254,10 @@ async function checkUnique(field, value, currentUid) {
 
 function toggleButtonLoading(btnId, isLoading, originalText) {
     const btn = document.getElementById(btnId);
-    btn.disabled = isLoading;
-    btn.innerText = isLoading ? "..." : originalText;
+    if(btn) {
+        btn.disabled = isLoading;
+        btn.innerText = isLoading ? "..." : originalText;
+    }
 }
 
 // Регистрация
@@ -370,7 +371,7 @@ btnCancelSetup.addEventListener('click', () => {
 
 // Проверка состояния пользователя
 async function checkUserState(user) {
-    if (user && user.emailVerified === false && user.providerData[0].providerId === 'password') return;
+    if (user && user.emailVerified === false && user.providerData?.[0]?.providerId === 'password') return;
 
     if (user) {
         const userRef = doc(db, "players", user.uid);
@@ -388,7 +389,6 @@ async function checkUserState(user) {
             btnCancelSetup.classList.add('hidden');
             showSection(setupSec, "Настройка профиля");
         } else {
-            // При входе пользователя отправляем на Главную страницу
             if(!isEditingProfile) {
                  showSection(mainSec, "Главная");
             }
@@ -428,10 +428,7 @@ async function checkUserState(user) {
             const profileBgBanner = document.getElementById('profileBgBanner');
             const menuProfileBg = document.getElementById('menuProfileBg');
             
-            const mainAvatarWrap = document.querySelector('.avatar-wrap');
-            if(mainAvatarWrap) mainAvatarWrap.style.boxShadow = colorConfig.glow;
 
-            bannerEl.style.boxShadow = colorConfig.glow;
             document.getElementById('eloLabelColor').style.color = colorConfig.txt;
 
             if(data.banner) bannerEl.style.backgroundImage = `url("${data.banner}")`;
@@ -462,18 +459,21 @@ async function checkUserState(user) {
         showSection(authSec, "Вход");
     }
 }
-// Код для переключения видимости подписок
+
+// ==========================================
+// ЛОГИКА ОТКРЫТИЯ ПАНЕЛИ ПОДПИСОК
+// ==========================================
 const trigger = document.getElementById('subTrigger');
 const subContainer = document.getElementById('subscriptionContainer');
 
 if (trigger && subContainer) {
+    trigger.removeAttribute('onclick'); 
     trigger.addEventListener('click', () => {
-        // Переключаем класс hidden (показать/скрыть)
         subContainer.classList.toggle('hidden');
-        
-        // Если блок показался, плавно прокручиваем к нему
         if (!subContainer.classList.contains('hidden')) {
-            subContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            setTimeout(() => {
+                subContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 50); 
         }
     });
 }
