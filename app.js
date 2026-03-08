@@ -1,20 +1,11 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, updateDoc, query, where, getDocs, collection, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-const firebaseConfig = {
-    apiKey: "AIzaSyAuQJaKE1GS4D6GbqZfhOtTij-GXIvQF1w",
-    authDomain: "project-faceit-22088.firebaseapp.com",
-    projectId: "project-faceit-22088",
-    storageBucket: "project-faceit-22088.appspot.com",
-    messagingSenderId: "681525286192",
-    appId: "1:681525286192:web:42dee0506a6c2cf32b64f5"
-};
+const supabaseUrl = 'https://njncknfjtekfkjcceuzc.supabase.co';
+const supabaseKey = 'sb_publishable_ug_cy6NOLwIPV7AaBQLrDw_mplsnQ2v';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const googleProvider = new GoogleAuthProvider();
+// Глобальная переменная для текущего юзера (заменяет auth.currentUser из Firebase)
+let currentUser = null; 
 
 async function fetchUserCountry() {
     try {
@@ -56,7 +47,7 @@ const sideMenu = document.getElementById('sideMenu');
 const menuOverlay = document.getElementById('menuOverlay');
 
 function toggleMenu() {
-    if (!auth.currentUser) {
+    if (!currentUser) {
         alert("Пожалуйста, зарегистрируйтесь или войдите в аккаунт, чтобы открыть меню.");
         return;
     }
@@ -80,7 +71,7 @@ if (navMainEl) {
         toggleMenu(); 
         // Очищаем URL от чужого ID при переходе на главную
         window.history.pushState(null, null, window.location.pathname);
-        checkUserState(auth.currentUser); 
+        checkUserState(currentUser); 
         showSection(mainSec, "Главная");
     });
 }
@@ -88,9 +79,9 @@ if (navMainEl) {
 const logoToMainEl = document.getElementById('logoToMain');
 if (logoToMainEl) {
     logoToMainEl.addEventListener('click', () => {
-        if(auth.currentUser) {
+        if(currentUser) {
             window.history.pushState(null, null, window.location.pathname);
-            checkUserState(auth.currentUser);
+            checkUserState(currentUser);
             showSection(mainSec, "Главная");
         }
     });
@@ -103,8 +94,7 @@ if (menuDisplayNameEl) {
         if(currentUserData && currentUserData.nickname) {
             // Возвращаемся в свой профиль
             window.history.pushState(null, null, window.location.pathname);
-            showSection(profileSec, currentUserData.nickname); // ИСПРАВЛЕНИЕ: Явный вызов профиля
-            checkUserState(auth.currentUser);
+            checkUserState(currentUser);
         }
     });
 }
@@ -134,7 +124,7 @@ tabs.forEach(tab => {
     });
 });
 
-// Поиск по сайту (Теперь работает!)
+// Поиск по сайту (Supabase ilike)
 const searchInput = document.getElementById('menuSearchInput');
 const searchResults = document.getElementById('searchResults');
 
@@ -149,25 +139,30 @@ if (searchInput && searchResults) {
         const val = rawVal.charAt(0).toUpperCase() + rawVal.slice(1);
         
         try {
-            const coll = collection(db, "players");
-            const q = query(coll, where("nickname", ">=", val), where("nickname", "<=", val + '\uf8ff'));
-            const snap = await getDocs(q);
+            const { data: snap, error } = await supabase
+                .from('players')
+                .select('*')
+                .ilike('nickname', `${val}%`); // Ищет по началу строки без учета регистра
+
+            if (error) throw error;
+
             searchResults.innerHTML = '';
             let found = 0;
 
-            snap.forEach(docSnap => {
-                const data = docSnap.data();
-                found++;
-                const div = document.createElement('div');
-                div.className = 'search-item';
-                div.innerText = data.clanTag ? `[${data.clanTag}] ${data.nickname}` : data.nickname;
-                div.onclick = () => {
-                    toggleMenu(); // Закрываем меню
-                    window.history.pushState(null, null, `?user=${data.gameId}`); // Меняем URL
-                    checkUserState(auth.currentUser); // Загружаем профиль
-                };
-                searchResults.appendChild(div);
-            });
+            if (snap && snap.length > 0) {
+                snap.forEach(data => {
+                    found++;
+                    const div = document.createElement('div');
+                    div.className = 'search-item';
+                    div.innerText = data.clanTag ? `[${data.clanTag}] ${data.nickname}` : data.nickname;
+                    div.onclick = () => {
+                        toggleMenu(); // Закрываем меню
+                        window.history.pushState(null, null, `?user=${data.gameId}`); // Меняем URL
+                        checkUserState(currentUser); // Загружаем профиль
+                    };
+                    searchResults.appendChild(div);
+                });
+            }
 
             if (found === 0) {
                 searchResults.innerHTML = '<div class="search-item" style="color:#aaa;">Никто не найден</div>';
@@ -181,13 +176,17 @@ if (searchInput && searchResults) {
 
 async function updateOnlineStats() {
     try {
-        // ИСПРАВЛЕНИЕ: Был неверный ID, заменен на правильный ID из HTML (menuTotalUsers)
-        const statsElement = document.getElementById('menuTotalUsers');
-        if (!statsElement) return;
+        const statsElement = document.getElementById('onlineStats');
+        const menuTotalUsers = document.getElementById('menuTotalUsers'); // Элемент в меню
 
-        const coll = collection(db, "players");
-        const snapshot = await getCountFromServer(coll);
-        statsElement.innerText = snapshot.data().count; // ИСПРАВЛЕНИЕ: Оставляем только число, так как в HTML текст уже есть
+        const { count, error } = await supabase
+            .from('players')
+            .select('*', { count: 'exact', head: true });
+
+        if (!error) {
+            if (statsElement) statsElement.innerText = `Игроков в базе: ${count}`;
+            if (menuTotalUsers) menuTotalUsers.innerText = count;
+        }
     } catch (e) {
         console.error("Ошибка при получении статистики:", e);
     }
@@ -219,8 +218,7 @@ let currentSubs = 0;
 
 if (btnSubscribe && subsCountEl) {
     btnSubscribe.addEventListener('click', async () => {
-        const user = auth.currentUser;
-        if (!user) {
+        if (!currentUser) {
             alert("Для подписки необходимо войти в аккаунт.");
             return;
         }
@@ -244,9 +242,11 @@ if (btnSubscribe && subsCountEl) {
         }
         subsCountEl.innerText = currentSubs;
 
-        // Сохраняем подписку тому человеку, чей профиль открыт
         try {
-            await updateDoc(doc(db, "players", viewedProfileUid), { subs: currentSubs });
+            await supabase
+                .from('players')
+                .update({ subs: currentSubs })
+                .eq('id', viewedProfileUid);
         } catch (e) {
             console.error("Ошибка при обновлении подписок:", e);
         }
@@ -293,14 +293,6 @@ function getRankDetails(elo) {
     return { rank: "Легенда", color: "#cc0000" };
 }
 
-async function checkUnique(field, value, currentUid) {
-    const q = query(collection(db, "players"), where(field, "==", value));
-    const snap = await getDocs(q);
-    let isUnique = true;
-    snap.forEach(doc => { if (doc.id !== currentUid) isUnique = false; });
-    return isUnique;
-}
-
 function toggleButtonLoading(btnId, isLoading, originalText) {
     const btn = document.getElementById(btnId);
     if(btn) {
@@ -309,7 +301,7 @@ function toggleButtonLoading(btnId, isLoading, originalText) {
     }
 }
 
-// Регистрация и логин
+// Регистрация и логин (Supabase Auth)
 const btnRegister = document.getElementById('btnRegister');
 if (btnRegister) {
     btnRegister.addEventListener('click', async () => { 
@@ -318,10 +310,12 @@ if (btnRegister) {
         if(pass.length < 6) return alert("Пароль минимум 6 символов!");
         toggleButtonLoading('btnRegister', true, 'Создать аккаунт');
         try {
-            const userCred = await createUserWithEmailAndPassword(auth, email, pass);
-            await sendEmailVerification(userCred.user);
-            alert("✅ Успешно! Отправлено письмо на почту. Подтверди её, затем войди.");
-            // onAuthStateChanged сам тихо сделает signOut, чтобы не конфликтовать
+            const { data, error } = await supabase.auth.signUp({
+                email: email,
+                password: pass,
+            });
+            if (error) throw error;
+            alert("✅ Успешно! Подтверди почту (если включено в настройках), затем войди.");
         } catch (e) { alert("Ошибка: " + e.message); } 
         finally { toggleButtonLoading('btnRegister', false, 'Создать аккаунт'); }
     });
@@ -334,11 +328,11 @@ if (btnLogin) {
         const pass = document.getElementById('password').value.trim();
         toggleButtonLoading('btnLogin', true, 'Войти');
         try { 
-            const userCred = await signInWithEmailAndPassword(auth, email, pass); 
-            if (!userCred.user.emailVerified) {
-                alert("⚠️ Почта еще не подтверждена!");
-                await signOut(auth);
-            }
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: email,
+                password: pass,
+            });
+            if (error) throw error;
         } catch (e) { alert("Ошибка входа! Проверьте данные."); } 
         finally { toggleButtonLoading('btnLogin', false, 'Войти'); }
     });
@@ -347,15 +341,17 @@ if (btnLogin) {
 const btnGoogle = document.getElementById('btnGoogle');
 if (btnGoogle) {
     btnGoogle.addEventListener('click', async () => {
-        try { await signInWithPopup(auth, googleProvider); } catch (e) { alert("Ошибка Google: " + e.message); }
+        try { 
+            const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' }); 
+            if (error) throw error;
+        } catch (e) { alert("Ошибка Google: " + e.message); }
     });
 }
 
 const btnSaveSetup = document.getElementById('btnSaveSetup');
 if (btnSaveSetup) {
     btnSaveSetup.addEventListener('click', async () => {
-        const user = auth.currentUser;
-        if (!user) return;
+        if (!currentUser) return;
         
         const nick = document.getElementById('setupNickname').value.trim();
         const gameId = document.getElementById('setupGameId').value.trim();
@@ -374,24 +370,26 @@ if (btnSaveSetup) {
         toggleButtonLoading('btnSaveSetup', true, 'Сохранить');
         
         try {
-            if (!currentUserData || nick !== currentUserData.nickname) {
-                const isNickUnique = await checkUnique("nickname", nick, user.uid);
-                if (!isNickUnique) throw new Error("Этот Никнейм уже занят!");
+            const { error } = await supabase
+                .from('players')
+                .update({ 
+                    nickname: nick, gameId: gameId, clanTag: clanTag || null, 
+                    role: role || "Рифлер", bannerColor: bannerColor || "red",
+                    avatar: avatarUrl || currentUser.user_metadata?.avatar_url || null, profileBanner: profileBannerUrl || null,
+                    banner: bannerUrl || null, socialTg: tgUrl || null, socialVk: vkUrl || null
+                })
+                .eq('id', currentUser.id);
+            
+            if (error) {
+                // В SQL таблице стоит UNIQUE на nickname и gameId, отлавливаем это
+                if (error.code === '23505') {
+                    throw new Error("Этот Никнейм или ID уже занят кем-то другим!");
+                }
+                throw error;
             }
-            if (!currentUserData || gameId !== currentUserData.gameId) {
-                const isIdUnique = await checkUnique("gameId", gameId, user.uid);
-                if (!isIdUnique) throw new Error("Этот ID уже привязан!");
-            }
-
-            await updateDoc(doc(db, "players", user.uid), { 
-                nickname: nick, gameId: gameId, clanTag: clanTag || null, 
-                role: role || "Рифлер", bannerColor: bannerColor || "red",
-                avatar: avatarUrl || user.photoURL || null, profileBanner: profileBannerUrl || null,
-                banner: bannerUrl || null, socialTg: tgUrl || null, socialVk: vkUrl || null
-            });
             
             isEditingProfile = false;
-            checkUserState(user); 
+            checkUserState(currentUser); 
         } catch (e) { alert(e.message); } 
         finally { toggleButtonLoading('btnSaveSetup', false, 'Сохранить'); }
     });
@@ -430,9 +428,10 @@ if (btnCancelSetup) {
 // ГЛАВНЫЙ РОУТЕР И РЕНДЕР: ЧТЕНИЕ URL
 // ==========================================
 async function checkUserState(user) {
-    // Убрал отсюда alert, чтобы избежать бага при регистрации нового пользователя.
-    if (user && user.emailVerified === false && user.providerData?.[0]?.providerId === 'password') {
-        signOut(auth);
+    currentUser = user; // Обновляем глобальную переменную
+
+    if (user && !user.email_confirmed_at && user.app_metadata?.provider === 'email') {
+        supabase.auth.signOut();
         showSection(authSec, "Вход");
         return;
     }
@@ -447,19 +446,27 @@ async function checkUserState(user) {
 
     // Если юзер авторизован - получаем его базовые данные для меню и проверок
     if (user) {
-        const userRef = doc(db, "players", user.uid);
-        let snap = await getDoc(userRef);
+        const { data: snap, error: getError } = await supabase
+            .from('players')
+            .select('*')
+            .eq('id', user.id)
+            .single();
         
-        if (!snap.exists()) {
+        if (!snap) {
             const country = await fetchUserCountry(); 
-            await setDoc(userRef, { 
-                email: user.email, elo: 0, wins: 0, losses: 0, subs: 0, 
-                country: country, matchHistory: [], avatar: user.photoURL || null, 
-                role: "Рифлер", bannerColor: "red" 
-            });
-            snap = await getDoc(userRef); 
+            const { data: newUser, error: insertError } = await supabase
+                .from('players')
+                .insert([{ 
+                    id: user.id, email: user.email, elo: 0, wins: 0, losses: 0, subs: 0, 
+                    country: country, matchHistory: [], avatar: user.user_metadata?.avatar_url || null, 
+                    role: "Рифлер", bannerColor: "red" 
+                }])
+                .select()
+                .single();
+            currentUserData = newUser;
+        } else {
+            currentUserData = snap;
         }
-        currentUserData = snap.data();
         
         if (!currentUserData.nickname || !currentUserData.gameId) {
             if (btnCancelSetup) btnCancelSetup.classList.add('hidden');
@@ -484,24 +491,26 @@ async function checkUserState(user) {
         if (user && currentUserData && targetGameId === currentUserData.gameId) {
             // Перешел по своей же ссылке
             dataToDisplay = currentUserData;
-            viewedProfileUid = user.uid;
+            viewedProfileUid = user.id;
             isOwner = true;
             window.history.replaceState(null, null, window.location.pathname); // убираем мусор из ссылки
         } else {
             // Загружаем ЧУЖОЙ профиль
-            const q = query(collection(db, "players"), where("gameId", "==", targetGameId));
-            const targetSnap = await getDocs(q);
+            const { data: targetSnap, error } = await supabase
+                .from('players')
+                .select('*')
+                .eq('gameId', targetGameId);
             
-            if (!targetSnap.empty) {
-                dataToDisplay = targetSnap.docs[0].data();
-                viewedProfileUid = targetSnap.docs[0].id;
+            if (targetSnap && targetSnap.length > 0) {
+                dataToDisplay = targetSnap[0];
+                viewedProfileUid = targetSnap[0].id;
                 isOwner = false;
             } else {
                 alert("Игрок с таким ID не найден!");
                 window.history.replaceState(null, null, window.location.pathname);
                 if (user) {
                     dataToDisplay = currentUserData;
-                    viewedProfileUid = user.uid;
+                    viewedProfileUid = user.id;
                     isOwner = true;
                 }
             }
@@ -509,7 +518,7 @@ async function checkUserState(user) {
     } else if (user) {
         // Обычный вход без ссылок
         dataToDisplay = currentUserData;
-        viewedProfileUid = user.uid;
+        viewedProfileUid = user.id;
         isOwner = true;
     }
 
@@ -519,14 +528,10 @@ async function checkUserState(user) {
             if (targetGameId) {
                 showSection(profileSec, dataToDisplay.nickname);
             } else if (setupSec && !setupSec.classList.contains('hidden')) {
-                // Если мы только что закончили настройку профиля - идем в ПРОФИЛЬ (исправлено)
+                // Если мы только что закончили настройку профиля - идем в ПРОФИЛЬ
                 showSection(profileSec, dataToDisplay.nickname);
             } else if (authSec && !authSec.classList.contains('hidden')) {
-                // ИСПРАВЛЕНИЕ: Открываем профиль сразу после входа
-                showSection(profileSec, dataToDisplay.nickname);
-            } else if (profileSec.classList.contains('hidden') && mainSec.classList.contains('hidden')) {
-                // ИСПРАВЛЕНИЕ: Если страница была обновлена, и все секции были спрятаны, мы открываем профиль
-                showSection(profileSec, dataToDisplay.nickname);
+                showSection(mainSec, "Главная");
             }
         }
 
@@ -637,9 +642,14 @@ if (trigger && subContainer) {
     });
 }
 
-onAuthStateChanged(auth, checkUserState);
+// Отслеживание изменений авторизации Supabase (замена onAuthStateChanged)
+supabase.auth.onAuthStateChange((event, session) => {
+    checkUserState(session?.user || null);
+});
 
 const btnLogout = document.getElementById('btnLogout');
 if (btnLogout) {
-    btnLogout.addEventListener('click', () => signOut(auth));
+    btnLogout.addEventListener('click', async () => {
+        await supabase.auth.signOut();
+    });
 }
