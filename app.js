@@ -342,11 +342,18 @@ const btnGoogle = document.getElementById('btnGoogle');
 if (btnGoogle) {
     btnGoogle.addEventListener('click', async () => {
         try { 
-            const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' }); 
+            const { error } = await supabase.auth.signInWithOAuth({ 
+                provider: 'google',
+                options: {
+                    // Явно указываем текущий адрес сайта для возврата
+                    redirectTo: window.location.origin + window.location.pathname
+                }
+            }); 
             if (error) throw error;
         } catch (e) { alert("Ошибка Google: " + e.message); }
     });
 }
+
 
 const btnSaveSetup = document.getElementById('btnSaveSetup');
 if (btnSaveSetup) {
