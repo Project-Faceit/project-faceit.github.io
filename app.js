@@ -372,16 +372,16 @@ if (btnSaveSetup) {
         try {
             const { error } = await supabase
                 .from('players')
-                .update({ 
+                .upsert({ 
+                    id: currentUser.id,
+                    email: currentUser.email,
                     nickname: nick, gameId: gameId, clanTag: clanTag || null, 
                     role: role || "Рифлер", bannerColor: bannerColor || "red",
                     avatar: avatarUrl || currentUser.user_metadata?.avatar_url || null, profileBanner: profileBannerUrl || null,
                     banner: bannerUrl || null, socialTg: tgUrl || null, socialVk: vkUrl || null
-                })
-                .eq('id', currentUser.id);
+                }, { onConflict: 'id' });
             
             if (error) {
-                // В SQL таблице стоит UNIQUE на nickname и gameId, отлавливаем это
                 if (error.code === '23505') {
                     throw new Error("Этот Никнейм или ID уже занят кем-то другим!");
                 }
@@ -463,7 +463,7 @@ async function checkUserState(user) {
                 }])
                 .select()
                 .single();
-            currentUserData = newUser;
+            currentUserData = newUser || { id: user.id, email: user.email }; 
         } else {
             currentUserData = snap;
         }
