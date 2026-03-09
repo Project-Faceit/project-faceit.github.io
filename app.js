@@ -2,7 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebas
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-// ВСТАВЬ СВОИ ДАННЫЕ ИЗ ФАЙРБЕЙСА СЮДА!
+// Данные из firebase (не трогаем!)
 const firebaseConfig = {
     apiKey: "AIzaSyAuQJaKE1GS4D6GbqZfhOtTij-GXIvQF1w",
     authDomain: "project-faceit-22088.firebaseapp.com",
@@ -21,6 +21,23 @@ let currentUser = null;
 let currentUserData = null; 
 let viewedProfileUid = null; 
 let isOwner = true; 
+
+// --- УТИЛИТА: Плавная анимация чисел ---
+function animateValue(obj, start, end, duration) {
+    if (!obj) return;
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        } else {
+            obj.innerHTML = end; // Фикс точности в конце
+        }
+    };
+    window.requestAnimationFrame(step);
+}
 
 async function fetchUserCountry() {
     try {
@@ -79,8 +96,8 @@ if (navMainEl) {
     navMainEl.addEventListener('click', (e) => {
         e.preventDefault();
         toggleMenu(); 
-        window.history.pushState(null, null, window.location.pathname);
-        checkUserState(currentUser); 
+        window.history.pushState(null, null, window.location.pathname); // Очищаем URL от ?user=
+        isOwner = true; // Сброс стейта
         showSection(mainSec, "Главная");
     });
 }
@@ -90,7 +107,7 @@ if (logoToMainEl) {
     logoToMainEl.addEventListener('click', () => {
         if(currentUser) {
             window.history.pushState(null, null, window.location.pathname);
-            checkUserState(currentUser);
+            isOwner = true;
             showSection(mainSec, "Главная");
         }
     });
@@ -104,6 +121,23 @@ if (menuDisplayNameEl) {
             window.history.pushState(null, null, window.location.pathname);
             checkUserState(currentUser);
         }
+    });
+}
+
+// Новые разделы: О нас и Тех. Поддержка
+const navAbout = document.getElementById('navAbout');
+if (navAbout) {
+    navAbout.addEventListener('click', (e) => {
+        e.preventDefault();
+        alert('Раздел "О нас" пока пуст. Скоро здесь будет информация о проекте Project Faceit!');
+    });
+}
+
+const navSupport = document.getElementById('navSupport');
+if (navSupport) {
+    navSupport.addEventListener('click', (e) => {
+        e.preventDefault();
+        alert('Раздел "Тех. поддержка" находится в разработке. Скоро вы сможете отправлять тикеты напрямую администрации.');
     });
 }
 
@@ -145,7 +179,6 @@ if (searchInput && searchResults) {
         }
         
         try {
-            // Firebase не имеет ilike, ищем по первым буквам (с учетом регистра)
             const q = query(collection(db, "players"), 
                 where("nickname", ">=", val), 
                 where("nickname", "<=", val + '\uf8ff')
@@ -179,29 +212,103 @@ if (searchInput && searchResults) {
     });
 }
 
-// Статистика онлайна
+// Статистика онлайна и Список пользователей
+let baseOnline = 0;
 async function updateOnlineStats() {
     try {
-        const statsElement = document.getElementById('onlineStats');
         const menuTotalUsers = document.getElementById('menuTotalUsers');
-
         const coll = collection(db, "players");
         const snapshot = await getCountFromServer(coll);
         const count = snapshot.data().count;
 
-        if (statsElement) statsElement.innerText = `Игроков в базе: ${count}`;
-        if (menuTotalUsers) menuTotalUsers.innerText = count;
+        if (menuTotalUsers) animateValue(menuTotalUsers, parseInt(menuTotalUsers.innerText) || 0, count, 1000);
         
-        // Рандомная симуляция онлайна
+        // Базовый онлайн (например, 30% от всех + рандом)
+        baseOnline = Math.max(1, Math.floor(count * 0.3) + Math.floor(Math.random() * 5));
         const onlineEl = document.getElementById('menuOnlineCount');
-        if (onlineEl) onlineEl.innerText = Math.max(1, Math.floor(count * 0.3) + Math.floor(Math.random() * 5));
+        if (onlineEl) onlineEl.innerText = baseOnline;
 
     } catch (e) {
         console.error("Ошибка при получении статистики:", e);
     }
 }
 updateOnlineStats();
-setInterval(updateOnlineStats, 60000);
+setInterval(updateOnlineStats, 60000); // Глобальное обновление раз в минуту
+
+// Эффект "живого" онлайна (мерцание чисел каждые 3 секунды)
+setInterval(() => {
+    const onlineEl = document.getElementById('menuOnlineCount');
+    if (onlineEl && baseOnline > 0) {
+        // Легкое колебание онлайна туда-сюда
+        const fluctuation = Math.floor(Math.random() * 3) - 1; 
+        let newOnline = Math.max(1, baseOnline + fluctuation);
+        onlineEl.innerText = newOnline;
+        
+        // Добавляем класс для вспышки (настрой в CSS: .text-glow { text-shadow: 0 0 10px red; transition: 0.3s; })
+        onlineEl.style.textShadow = "0 0 15px rgba(255, 42, 42, 0.8)";
+        setTimeout(() => { onlineEl.style.textShadow = "none"; }, 500);
+    }
+}, 3500);
+
+// --- НОВОЕ: Выпадающий список всех игроков ---
+const toggleUsersListBtn = document.getElementById('toggleUsersList');
+const registeredUsersDropdown = document.getElementById('registeredUsersDropdown');
+const usersListContainer = document.getElementById('usersListContainer');
+let usersListLoaded = false;
+
+if (toggleUsersListBtn && registeredUsersDropdown && usersListContainer) {
+    toggleUsersListBtn.addEventListener('click', async () => {
+        registeredUsersDropdown.classList.toggle('hidden');
+        
+        // Если открываем и еще не загружали - грузим из Firebase
+        if (!registeredUsersDropdown.classList.contains('hidden') && !usersListLoaded) {
+            usersListContainer.innerHTML = '<li class="loading-text" style="text-align:center; padding: 10px; color: var(--text-muted);">Загрузка базы...</li>';
+            try {
+                const q = query(collection(db, "players"));
+                const querySnapshot = await getDocs(q);
+                usersListContainer.innerHTML = '';
+                
+                if (querySnapshot.empty) {
+                    usersListContainer.innerHTML = '<li style="text-align:center; padding: 10px;">Список пуст</li>';
+                } else {
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        const li = document.createElement('li');
+                        li.style.padding = "8px 10px";
+                        li.style.borderBottom = "1px solid rgba(255,255,255,0.05)";
+                        li.style.cursor = "pointer";
+                        li.style.display = "flex";
+                        li.style.justifyContent = "space-between";
+                        
+                        const nameSpan = document.createElement('span');
+                        nameSpan.style.color = "white";
+                        nameSpan.style.fontWeight = "500";
+                        nameSpan.innerText = data.clanTag ? `[${data.clanTag}] ${data.nickname}` : data.nickname;
+                        
+                        const idSpan = document.createElement('span');
+                        idSpan.style.color = "var(--text-muted)";
+                        idSpan.style.fontSize = "0.8rem";
+                        idSpan.innerText = `ID: ${data.gameId}`;
+                        
+                        li.appendChild(nameSpan);
+                        li.appendChild(idSpan);
+                        
+                        li.onclick = () => {
+                            toggleMenu();
+                            window.history.pushState(null, null, `?user=${data.gameId}`);
+                            checkUserState(currentUser);
+                        };
+                        usersListContainer.appendChild(li);
+                    });
+                }
+                usersListLoaded = true;
+            } catch (err) {
+                console.error("Ошибка загрузки списка:", err);
+                usersListContainer.innerHTML = '<li style="color:red; text-align:center;">Ошибка подключения</li>';
+            }
+        }
+    });
+}
 
 const shareBtn = document.getElementById('btnShareProfile');
 if (shareBtn) {
@@ -507,6 +614,7 @@ async function checkUserState(user) {
             } else if (setupSec && !setupSec.classList.contains('hidden')) {
                 showSection(profileSec, dataToDisplay.nickname);
             } else if (authSec && !authSec.classList.contains('hidden')) {
+                // Если мы только что авторизовались, по дефолту кидаем на Главную
                 showSection(mainSec, "Главная");
             }
         }
@@ -521,19 +629,21 @@ async function checkUserState(user) {
         const clanDisplay = document.getElementById('displayClanTag');
         if (clanDisplay) clanDisplay.innerText = dataToDisplay.clanTag ? `[${dataToDisplay.clanTag}] ` : '';
 
-        const displayGameId = document.getElementById('displayGameId');
-        if (displayGameId) {
-            displayGameId.innerText = dataToDisplay.gameId;
-            displayGameId.setAttribute('data-id', dataToDisplay.gameId);
+        const displayGameIdEl = document.getElementById('displayGameId');
+        if (displayGameIdEl) {
+            displayGameIdEl.innerText = dataToDisplay.gameId;
+            displayGameIdEl.setAttribute('data-id', dataToDisplay.gameId);
         }
 
         const wins = dataToDisplay.wins || 0; 
         const losses = dataToDisplay.losses || 0; 
         const elo = dataToDisplay.elo || 1000;
         
-        document.getElementById('elo').innerText = elo;
-        document.getElementById('wins').innerText = wins;
-        document.getElementById('losses').innerText = losses;
+        // --- Вызов анимации чисел ---
+        animateValue(document.getElementById('elo'), 0, elo, 1500);
+        animateValue(document.getElementById('wins'), 0, wins, 1000);
+        animateValue(document.getElementById('losses'), 0, losses, 1000);
+        
         document.getElementById('displayCountry').innerText = dataToDisplay.country || "Неизвестно";
         
         currentSubs = dataToDisplay.subs || 0;
