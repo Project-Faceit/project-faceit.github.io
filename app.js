@@ -1,23 +1,37 @@
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-const supabaseUrl = 'https://njncknfjtekfkjcceuzc.supabase.co';
-const supabaseKey = 'sb_publishable_ug_cy6NOLwIPV7AaBQLrDw_mplsnQ2v';
-const supabase = createClient(supabaseUrl, supabaseKey);
+// ВСТАВЬ СВОИ ДАННЫЕ ИЗ ФАЙРБЕЙСА СЮДА!
+const firebaseConfig = {
+    apiKey: "AIzaSyAuQJaKE1GS4D6GbqZfhOtTij-GXIvQF1w",
+    authDomain: "project-faceit-22088.firebaseapp.com",
+    projectId: "project-faceit-22088",
+    storageBucket: "project-faceit-22088.firebasestorage.app",
+    messagingSenderId: "681525286192",
+    appId: "1:681525286192:web:42dee0506a6c2cf32b64f5"
+};
 
-// Глобальная переменная для текущего юзера (заменяет auth.currentUser из Firebase)
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const googleProvider = new GoogleAuthProvider();
+
 let currentUser = null; 
+let currentUserData = null; 
+let viewedProfileUid = null; 
+let isOwner = true; 
 
 async function fetchUserCountry() {
     try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000); // Тайм-аут 3 секунды, чтобы сайт не вис
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
         const res = await fetch('https://ipapi.co/json/', { signal: controller.signal });
         clearTimeout(timeoutId);
         const data = await res.json();
         return data.country_name || "Неизвестно";
     } catch (e) {
-        console.error("Ошибка при определении страны:", e);
-        return "Неизвестно"; // Мгновенный фоллбэк
+        return "Неизвестно";
     }
 }
 
@@ -26,11 +40,7 @@ const profileSec = document.getElementById('profileSection');
 const setupSec = document.getElementById('setupSection');
 const mainSec = document.getElementById('mainSection');
 const btnCancelSetup = document.getElementById('btnCancelSetup');
-
 let isEditingProfile = false;
-let currentUserData = null; // Данные того, кто залогинен
-let viewedProfileUid = null; // UID профиля, который сейчас открыт на экране
-let isOwner = true; // Смотрит ли юзер свой собственный профиль
 
 function showSection(sectionElem, titleString) {
     [authSec, profileSec, setupSec, mainSec].forEach(sec => {
@@ -69,7 +79,6 @@ if (navMainEl) {
     navMainEl.addEventListener('click', (e) => {
         e.preventDefault();
         toggleMenu(); 
-        // Очищаем URL от чужого ID при переходе на главную
         window.history.pushState(null, null, window.location.pathname);
         checkUserState(currentUser); 
         showSection(mainSec, "Главная");
@@ -92,7 +101,6 @@ if (menuDisplayNameEl) {
     menuDisplayNameEl.addEventListener('click', () => {
         toggleMenu();
         if(currentUserData && currentUserData.nickname) {
-            // Возвращаемся в свой профиль
             window.history.pushState(null, null, window.location.pathname);
             checkUserState(currentUser);
         }
@@ -124,45 +132,42 @@ tabs.forEach(tab => {
     });
 });
 
-// Поиск по сайту (Supabase ilike)
+// Живой поиск Firebase
 const searchInput = document.getElementById('menuSearchInput');
 const searchResults = document.getElementById('searchResults');
 
 if (searchInput && searchResults) {
     searchInput.addEventListener('input', async (e) => {
-        const rawVal = e.target.value.trim(); 
-        if (rawVal.length < 2) {
+        const val = e.target.value.trim(); 
+        if (val.length < 2) {
             searchResults.style.display = 'none';
             return;
         }
         
-        const val = rawVal.charAt(0).toUpperCase() + rawVal.slice(1);
-        
         try {
-            const { data: snap, error } = await supabase
-                .from('players')
-                .select('*')
-                .ilike('nickname', `${val}%`); // Ищет по началу строки без учета регистра
-
-            if (error) throw error;
+            // Firebase не имеет ilike, ищем по первым буквам (с учетом регистра)
+            const q = query(collection(db, "players"), 
+                where("nickname", ">=", val), 
+                where("nickname", "<=", val + '\uf8ff')
+            );
+            const querySnapshot = await getDocs(q);
 
             searchResults.innerHTML = '';
             let found = 0;
 
-            if (snap && snap.length > 0) {
-                snap.forEach(data => {
-                    found++;
-                    const div = document.createElement('div');
-                    div.className = 'search-item';
-                    div.innerText = data.clanTag ? `[${data.clanTag}] ${data.nickname}` : data.nickname;
-                    div.onclick = () => {
-                        toggleMenu(); // Закрываем меню
-                        window.history.pushState(null, null, `?user=${data.gameId}`); // Меняем URL
-                        checkUserState(currentUser); // Загружаем профиль
-                    };
-                    searchResults.appendChild(div);
-                });
-            }
+            querySnapshot.forEach((doc) => {
+                found++;
+                const data = doc.data();
+                const div = document.createElement('div');
+                div.className = 'search-item';
+                div.innerText = data.clanTag ? `[${data.clanTag}] ${data.nickname}` : data.nickname;
+                div.onclick = () => {
+                    toggleMenu(); 
+                    window.history.pushState(null, null, `?user=${data.gameId}`); 
+                    checkUserState(currentUser); 
+                };
+                searchResults.appendChild(div);
+            });
 
             if (found === 0) {
                 searchResults.innerHTML = '<div class="search-item" style="color:#aaa;">Никто не найден</div>';
@@ -174,19 +179,23 @@ if (searchInput && searchResults) {
     });
 }
 
+// Статистика онлайна
 async function updateOnlineStats() {
     try {
         const statsElement = document.getElementById('onlineStats');
-        const menuTotalUsers = document.getElementById('menuTotalUsers'); // Элемент в меню
+        const menuTotalUsers = document.getElementById('menuTotalUsers');
 
-        const { count, error } = await supabase
-            .from('players')
-            .select('*', { count: 'exact', head: true });
+        const coll = collection(db, "players");
+        const snapshot = await getCountFromServer(coll);
+        const count = snapshot.data().count;
 
-        if (!error) {
-            if (statsElement) statsElement.innerText = `Игроков в базе: ${count}`;
-            if (menuTotalUsers) menuTotalUsers.innerText = count;
-        }
+        if (statsElement) statsElement.innerText = `Игроков в базе: ${count}`;
+        if (menuTotalUsers) menuTotalUsers.innerText = count;
+        
+        // Рандомная симуляция онлайна
+        const onlineEl = document.getElementById('menuOnlineCount');
+        if (onlineEl) onlineEl.innerText = Math.max(1, Math.floor(count * 0.3) + Math.floor(Math.random() * 5));
+
     } catch (e) {
         console.error("Ошибка при получении статистики:", e);
     }
@@ -197,7 +206,6 @@ setInterval(updateOnlineStats, 60000);
 const shareBtn = document.getElementById('btnShareProfile');
 if (shareBtn) {
     shareBtn.addEventListener('click', () => {
-        // Копируем ссылку на профиль, который сейчас ОТКРЫТ (неважно твой или чужой)
         const gameIdToShare = document.getElementById('displayGameId').getAttribute('data-id');
         if(!gameIdToShare || gameIdToShare === '00000000') return;
         
@@ -210,7 +218,7 @@ if (shareBtn) {
     });
 }
 
-// Подписки теперь работают корректно
+// Подписки
 const btnSubscribe = document.getElementById('btnSubscribe');
 const subsCountEl = document.getElementById('subsCount');
 let isSubscribed = false; 
@@ -243,10 +251,7 @@ if (btnSubscribe && subsCountEl) {
         subsCountEl.innerText = currentSubs;
 
         try {
-            await supabase
-                .from('players')
-                .update({ subs: currentSubs })
-                .eq('id', viewedProfileUid);
+            await updateDoc(doc(db, "players", viewedProfileUid), { subs: currentSubs });
         } catch (e) {
             console.error("Ошибка при обновлении подписок:", e);
         }
@@ -301,7 +306,7 @@ function toggleButtonLoading(btnId, isLoading, originalText) {
     }
 }
 
-// Регистрация и логин (Supabase Auth)
+// Авторизация Firebase
 const btnRegister = document.getElementById('btnRegister');
 if (btnRegister) {
     btnRegister.addEventListener('click', async () => { 
@@ -310,12 +315,8 @@ if (btnRegister) {
         if(pass.length < 6) return alert("Пароль минимум 6 символов!");
         toggleButtonLoading('btnRegister', true, 'Создать аккаунт');
         try {
-            const { data, error } = await supabase.auth.signUp({
-                email: email,
-                password: pass,
-            });
-            if (error) throw error;
-            alert("✅ Успешно! Подтверди почту (если включено в настройках), затем войди.");
+            await createUserWithEmailAndPassword(auth, email, pass);
+            alert("✅ Успешно! Вы зарегистрированы.");
         } catch (e) { alert("Ошибка: " + e.message); } 
         finally { toggleButtonLoading('btnRegister', false, 'Создать аккаунт'); }
     });
@@ -328,11 +329,7 @@ if (btnLogin) {
         const pass = document.getElementById('password').value.trim();
         toggleButtonLoading('btnLogin', true, 'Войти');
         try { 
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email: email,
-                password: pass,
-            });
-            if (error) throw error;
+            await signInWithEmailAndPassword(auth, email, pass);
         } catch (e) { alert("Ошибка входа! Проверьте данные."); } 
         finally { toggleButtonLoading('btnLogin', false, 'Войти'); }
     });
@@ -342,18 +339,10 @@ const btnGoogle = document.getElementById('btnGoogle');
 if (btnGoogle) {
     btnGoogle.addEventListener('click', async () => {
         try { 
-            const { error } = await supabase.auth.signInWithOAuth({ 
-                provider: 'google',
-                options: {
-                    // Явно указываем текущий адрес сайта для возврата
-                    redirectTo: window.location.origin + window.location.pathname
-                }
-            }); 
-            if (error) throw error;
+            await signInWithPopup(auth, googleProvider);
         } catch (e) { alert("Ошибка Google: " + e.message); }
     });
 }
-
 
 const btnSaveSetup = document.getElementById('btnSaveSetup');
 if (btnSaveSetup) {
@@ -377,23 +366,27 @@ if (btnSaveSetup) {
         toggleButtonLoading('btnSaveSetup', true, 'Сохранить');
         
         try {
-            const { error } = await supabase
-                .from('players')
-                .upsert({ 
-                    id: currentUser.id,
-                    email: currentUser.email,
-                    nickname: nick, gameId: gameId, clanTag: clanTag || null, 
-                    role: role || "Рифлер", bannerColor: bannerColor || "red",
-                    avatar: avatarUrl || currentUser.user_metadata?.avatar_url || null, profileBanner: profileBannerUrl || null,
-                    banner: bannerUrl || null, socialTg: tgUrl || null, socialVk: vkUrl || null
-                }, { onConflict: 'id' });
-            
-            if (error) {
-                if (error.code === '23505') {
-                    throw new Error("Этот Никнейм или ID уже занят кем-то другим!");
-                }
-                throw error;
+            // Проверка уникальности Nickname
+            if (!currentUserData || nick !== currentUserData.nickname) {
+                const qNick = query(collection(db, "players"), where("nickname", "==", nick));
+                const snapNick = await getDocs(qNick);
+                if (!snapNick.empty) throw new Error("Этот Никнейм уже занят!");
             }
+            
+            // Проверка уникальности ID
+            if (!currentUserData || gameId !== currentUserData.gameId) {
+                const qId = query(collection(db, "players"), where("gameId", "==", gameId));
+                const snapId = await getDocs(qId);
+                if (!snapId.empty) throw new Error("Этот ID уже привязан!");
+            }
+
+            await setDoc(doc(db, "players", currentUser.uid), { 
+                email: currentUser.email,
+                nickname: nick, gameId: gameId, clanTag: clanTag || null, 
+                role: role || "Рифлер", bannerColor: bannerColor || "red",
+                avatar: avatarUrl || currentUser.photoURL || null, profileBanner: profileBannerUrl || null,
+                banner: bannerUrl || null, socialTg: tgUrl || null, socialVk: vkUrl || null
+            }, { merge: true });
             
             isEditingProfile = false;
             checkUserState(currentUser); 
@@ -430,49 +423,32 @@ if (btnCancelSetup) {
     });
 }
 
-
-// ==========================================
-// ГЛАВНЫЙ РОУТЕР И РЕНДЕР: ЧТЕНИЕ URL
-// ==========================================
+// Главный роутер
 async function checkUserState(user) {
-    currentUser = user; // Обновляем глобальную переменную
-
-    if (user && !user.email_confirmed_at && user.app_metadata?.provider === 'email') {
-        supabase.auth.signOut();
-        showSection(authSec, "Вход");
-        return;
-    }
+    currentUser = user; 
 
     let dataToDisplay = null;
     isOwner = true;
     viewedProfileUid = null;
 
-    // Читаем ссылку ?user=123456
     const urlParams = new URLSearchParams(window.location.search);
     const targetGameId = urlParams.get('user');
 
-    // Если юзер авторизован - получаем его базовые данные для меню и проверок
     if (user) {
-        const { data: snap, error: getError } = await supabase
-            .from('players')
-            .select('*')
-            .eq('id', user.id)
-            .single();
+        const userRef = doc(db, "players", user.uid);
+        const docSnap = await getDoc(userRef);
         
-        if (!snap) {
+        if (!docSnap.exists()) {
             const country = await fetchUserCountry(); 
-            const { data: newUser, error: insertError } = await supabase
-                .from('players')
-                .insert([{ 
-                    id: user.id, email: user.email, elo: 0, wins: 0, losses: 0, subs: 0, 
-                    country: country, matchHistory: [], avatar: user.user_metadata?.avatar_url || null, 
-                    role: "Рифлер", bannerColor: "red" 
-                }])
-                .select()
-                .single();
-            currentUserData = newUser || { id: user.id, email: user.email }; 
+            const newUserData = { 
+                email: user.email, elo: 0, wins: 0, losses: 0, subs: 0, 
+                country: country, matchHistory: [], avatar: user.photoURL || null, 
+                role: "Рифлер", bannerColor: "red" 
+            };
+            await setDoc(userRef, newUserData);
+            currentUserData = { id: user.uid, ...newUserData }; 
         } else {
-            currentUserData = snap;
+            currentUserData = { id: docSnap.id, ...docSnap.data() };
         }
         
         if (!currentUserData.nickname || !currentUserData.gameId) {
@@ -493,56 +469,48 @@ async function checkUserState(user) {
         }
     }
 
-    // Решаем чей профиль грузить
     if (targetGameId) {
         if (user && currentUserData && targetGameId === currentUserData.gameId) {
-            // Перешел по своей же ссылке
             dataToDisplay = currentUserData;
-            viewedProfileUid = user.id;
+            viewedProfileUid = user.uid;
             isOwner = true;
-            window.history.replaceState(null, null, window.location.pathname); // убираем мусор из ссылки
+            window.history.replaceState(null, null, window.location.pathname); 
         } else {
-            // Загружаем ЧУЖОЙ профиль
-            const { data: targetSnap, error } = await supabase
-                .from('players')
-                .select('*')
-                .eq('gameId', targetGameId);
+            const q = query(collection(db, "players"), where("gameId", "==", targetGameId));
+            const querySnapshot = await getDocs(q);
             
-            if (targetSnap && targetSnap.length > 0) {
-                dataToDisplay = targetSnap[0];
-                viewedProfileUid = targetSnap[0].id;
+            if (!querySnapshot.empty) {
+                const targetDoc = querySnapshot.docs[0];
+                dataToDisplay = { id: targetDoc.id, ...targetDoc.data() };
+                viewedProfileUid = targetDoc.id;
                 isOwner = false;
             } else {
                 alert("Игрок с таким ID не найден!");
                 window.history.replaceState(null, null, window.location.pathname);
                 if (user) {
                     dataToDisplay = currentUserData;
-                    viewedProfileUid = user.id;
+                    viewedProfileUid = user.uid;
                     isOwner = true;
                 }
             }
         }
     } else if (user) {
-        // Обычный вход без ссылок
         dataToDisplay = currentUserData;
-        viewedProfileUid = user.id;
+        viewedProfileUid = user.uid;
         isOwner = true;
     }
 
-    // Если данные получены - рисуем страницу профиля/главную
     if (dataToDisplay) {
         if (!isEditingProfile) {
             if (targetGameId) {
                 showSection(profileSec, dataToDisplay.nickname);
             } else if (setupSec && !setupSec.classList.contains('hidden')) {
-                // Если мы только что закончили настройку профиля - идем в ПРОФИЛЬ
                 showSection(profileSec, dataToDisplay.nickname);
             } else if (authSec && !authSec.classList.contains('hidden')) {
                 showSection(mainSec, "Главная");
             }
         }
 
-        // Прячем кнопку "Редактировать", если смотрим чужой профиль
         if (btnEditProfile) {
             btnEditProfile.style.display = isOwner ? 'inline-block' : 'none';
         }
@@ -570,15 +538,6 @@ async function checkUserState(user) {
         
         currentSubs = dataToDisplay.subs || 0;
         if (subsCountEl) subsCountEl.innerText = currentSubs;
-
-        const recentMatches = document.getElementById('recentMatchesList');
-        const allMatches = document.getElementById('allMatchesList');
-        if (recentMatches && allMatches) {
-            if (!dataToDisplay.matchHistory || dataToDisplay.matchHistory.length === 0) {
-                recentMatches.innerHTML = '<div style="padding: 15px; color: var(--text-muted); text-align: center;">Нет сыгранных матчей</div>';
-                allMatches.innerHTML = '<div style="padding: 15px; color: var(--text-muted); text-align: center;">Нет сыгранных матчей</div>';
-            }
-        }
 
         try {
             const totalMatches = wins + losses;
@@ -628,7 +587,6 @@ async function checkUserState(user) {
             }
         }
     } else {
-        // Если вообще нет данных (не авторизован и не пришел по ссылке)
         const menuDisplayName = document.getElementById('menuDisplayName');
         if (menuDisplayName) menuDisplayName.innerText = 'Авторизуйтесь';
         isEditingProfile = false;
@@ -649,14 +607,14 @@ if (trigger && subContainer) {
     });
 }
 
-// Отслеживание изменений авторизации Supabase (замена onAuthStateChanged)
-supabase.auth.onAuthStateChange((event, session) => {
-    checkUserState(session?.user || null);
+// Отслеживание сессии Firebase
+onAuthStateChanged(auth, (user) => {
+    checkUserState(user);
 });
 
 const btnLogout = document.getElementById('btnLogout');
 if (btnLogout) {
     btnLogout.addEventListener('click', async () => {
-        await supabase.auth.signOut();
+        await signOut(auth);
     });
 }
