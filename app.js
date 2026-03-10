@@ -888,3 +888,18 @@ if (navSupportBtn && supportModalOverlay) {
         }
     });
 }
+
+const btnSubmitSupport = document.getElementById('btnSubmitSupport');
+
+btnSubmitSupport.addEventListener('click', async () => {
+    // Получаем ответ капчи
+    const captchaResponse = grecaptcha.getResponse();
+
+    if (captchaResponse.length === 0) {
+        alert("Пожалуйста, подтвердите, что вы не робот!");
+        return;
+    }
+
+    // Если капча пройдена, выполняем твой код отправки...
+    // ...
+});
